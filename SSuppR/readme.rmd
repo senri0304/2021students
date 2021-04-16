@@ -1,0 +1,34 @@
+---
+title: "stereopsis disrupt rivalry, in which the precedence the stereo matching network"
+author: yhasegawa
+date: 2021/03/24
+output: html_notebook
+---
+
+### background
+Vision researchers showed stereopsis and rivalry, binocular phenomena, exclude mutually or coexist. Their interaction is not sure which is which. We attempt to explain the puzzle by the stereo matching network.
+
+### What we do
+Two experimentation were conducted.
+
+#### First.
+The bar and two dots, which coincide endpoints of the bar, observed dichoptically.
+
+They were separated laterally, -25 to 25 in resolution. Do translate to visual angle...
+
+Although the retinal images of the two eyes show little similarity, the visual system interprets depth from their disparity.
+
+Observers asked press DOWN-key during disappearing stereoscopic depth.
+
+The cumulative disappearance times recorded indicates correspondence intensity of unit in the network.
+
+#### Second.
+The bar and four dots. Two of four coincided endpoints of the bar, the other coincided endpoints of the bar which rotated 90 degrees.
+
+The former which is a stereoscopic pair, the latter which corresponded competitively rivaled.
+
+The dots of stereoscopic pair was manipulated their lateral position, -25 to 25 in resolution.
+
+Observers asked press DOWN-key during disappearing the bar, which is a monocular image.
+
+The cumulative disappearance times recorded indicates intensity of the rival unit relative to the stereoscopic unit in the network.
