@@ -28,7 +28,7 @@ deg1 = display_info.deg1
 cntx = screens[len(screens)-1].width / 2  # Store center of screen about x position
 cnty = screens[len(screens)-1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
-iso = 7.5
+iso = 7.0
 draw_objects = []  # 描画対象リスト
 end_routine = False  # Routine status to be exitable or not
 #tc = 0  # Count transients
@@ -87,15 +87,15 @@ class key_resp(object):
             trial_start = time.time()
         if exit is False and symbol == key.LEFT:
             response.append(1)
-#            delete()
+            delete()
             p_sound.play()
-            exit = True
+#            exit = True
             get_results()
         if exit is False and symbol == key.RIGHT:
             response.append(0)
-#            delete()
+            delete()
             p_sound.play()
-            exit = True
+#            exit = True
             get_results()
         if symbol == key.ESCAPE:
             win.close()
@@ -122,7 +122,6 @@ def replace():
     fixer()
     draw_objects.append(R)
     draw_objects.append(L)
-    pyglet.clock.schedule_once(delete, 40.5)
 
 
 # A end routine function
@@ -145,7 +144,7 @@ def on_draw():
 
 
 # Remove stimulus
-def delete(dt):
+def delete():
     global n, trial_end
     del draw_objects[:]
     p_sound.play()
@@ -172,7 +171,7 @@ def get_results():
     print("--------------------------------------------------")
     print("trial: " + str(n) + "/" + str(len(variation2)))
     print("start: " + str(trial_start))
-    print("end: " + str(trial_end))
+#    print("end: " + str(trial_end))
     print("key_pressed: " + str(response[len(response)-1]))
 #    print("transient counts: " + str(tc))
 #    print("cdt: " + str(c))
@@ -182,7 +181,7 @@ def get_results():
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
-        pyglet.clock.schedule_once(exit_routine, 5.0)
+        pyglet.clock.schedule_once(exit_routine, 2.0)
     else:
         pyglet.app.exit()
 

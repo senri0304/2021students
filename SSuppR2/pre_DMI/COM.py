@@ -11,7 +11,7 @@ import display_info
 
 # Preference
 # ------------------------------------------------------------------------
-rept = 3
+rept = 5
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ deg1 = display_info.deg1
 cntx = screens[len(screens)-1].width / 2  # Store center of screen about x position
 cnty = screens[len(screens)-1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
-iso = 7.5
+iso = 7.0
 draw_objects = []  # 描画対象リスト
 end_routine = False  # Routine status to be exitable or not
 tc = 0  # Count transients
@@ -48,32 +48,18 @@ fixr = pyglet.sprite.Sprite(pedestal, x=cntx+iso*deg1-pedestal.width/2.0, y=cnty
 fixl = pyglet.sprite.Sprite(pedestal, x=cntx-iso*deg1-pedestal.width/2.0, y=cnty-pedestal.height/2.0)
 
 # disparities
-variation = list(range(-8, 9, 2))
-variation.remove(0)
 test_eye = [-1, 1]
 
-# measure only crossed disparity
-# Replicate for repetition
-variation2 = list(np.repeat(variation, rept))
-test_eye2 = list(np.repeat(test_eye, len(variation2)/2))
-
 # added zero disparity condition
-variation2.extend([0]*rept*len(test_eye))
-test_eye2.extend(test_eye*rept)
-
-print(variation2)
-print(test_eye2)
+test_eye.extend(test_eye*rept)
 
 # Randomize
-r = random.randint(0, math.factorial(len(variation2)))
+r = random.randint(0, math.factorial(len(test_eye)))
 random.seed(r)
-sequence = random.sample(variation2, len(variation2))
-random.seed(r)
-sequence3 = random.sample(test_eye2, len(variation2))
+sequence3 = random.sample(test_eye, len(test_eye))
 
-print(sequence)
 print(sequence3)
-print(len(sequence))
+print(len(sequence3))
 
 
 # ----------- Core program following ----------------------------
@@ -148,7 +134,7 @@ def delete(dt):
 
 
 def get_results(dt):
-    global ku, kud, kd, kud_list, mdt, dtstd, n, tc, tcs, sequence
+    global ku, kud, kd, kud_list, mdt, dtstd, n, tc, tcs, sequence3
     ku.append(trial_start + 30.0)
     while len(kd) > 0:
         kud.append(ku.popleft() - kd.popleft() + 0)  # list up key_press_duration
@@ -163,7 +149,7 @@ def get_results(dt):
     mdt.append(m)
     dtstd.append(d)
     print("--------------------------------------------------")
-    print("trial: " + str(n) + "/" + str(len(variation2)))
+    print("trial: " + str(n) + "/" + str(len(test_eye)))
     print("start: " + str(trial_start))
     print("end: " + str(trial_end))
     print("key_pressed: " + str(kud))
@@ -171,32 +157,32 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))
+    print("condition: " + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
-    if n != len(variation2):
+    if n != len(test_eye):
         pyglet.clock.schedule_once(exit_routine, 14.0)
     else:
         pyglet.app.exit()
 
 
-def set_polygon(seq, seq3):
+def set_polygon(seq3):
     global L, R, n
     # Set up polygon for stimulus
     R = pyglet.resource.image('stereograms/ls.png')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso * seq3 - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/' + str(seq) + 'ds.png')
+    L = pyglet.resource.image('stereograms/ds.png')
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso * seq3 - L.width / 2.0
     L.y = cnty - L.height / 2.0
 
 
 def prepare_routine():
-    if n < len(variation2):
+    if n < len(test_eye):
         fixer()
-        set_polygon(sequence[n], sequence3[n])
+        set_polygon(sequence3[n])
     else:
         pass
 
@@ -206,10 +192,10 @@ start = time.time()
 win.push_handlers(resp_handler)
 
 fixer()
-set_polygon(sequence[0], sequence3[0])
+set_polygon(sequence3[0])
 
 
-for i in sequence:
+for i in sequence3:
     tc = 0  # Count transients
     ku = deque([])  # Store unix time when key up
     kd = deque([])  # Store unix time when key down
@@ -226,8 +212,7 @@ end_time = time.time()
 daten = datetime.datetime.now()
 
 # Write results onto csv
-results = pd.DataFrame({'angle': sequence,  # Store variance_A conditions
-                        'test_eye': sequence3,
+results = pd.DataFrame({'test_eye': sequence3,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

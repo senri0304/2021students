@@ -64,11 +64,11 @@ def stereogramize(disparity):
     # stereoscopic dots
     draw.rectangle((int(sz / 2) - int(f / 2) + disparity, int(sz / 2) + int(ll / 2),
                     int(sz / 2) + int(f / 2) + disparity, int(sz / 2) - int(f) + int(ll / 2)),
-                   fill=(0, 0, 0), outline=None)
+                   fill=(50, 50, 50), outline=None)
 
     draw.rectangle((int(sz / 2) - int(f / 2) + disparity, int(sz / 2) + int(f) - int(ll / 2),
                     int(sz / 2) + int(f / 2) + disparity, int(sz / 2) - int(ll / 2)),
-                   fill=(0, 0, 0), outline=None)
+                   fill=(50, 50, 50), outline=None)
 
     fixation(draw)
 

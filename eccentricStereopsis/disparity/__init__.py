@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os, pyglet, wave, struct
+import os, wave, struct
 import numpy as np
 from PIL import Image, ImageDraw
 from display_info import *
@@ -35,76 +35,66 @@ d_height = 2.54 * (aspect_height / c) * inch
 
 sz = round(resolution * (size / d_height))
 ll = round(resolution * line_length / d_height)
-f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
-
-# Input the disparity at pixel units.
-disparity = f*2
+f = round(sz * 0.023 / 2)  # 2 pix, approximately 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
 
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
-# array of variable 2
-variation2 = list(np.repeat([1, -1], len(variation)))
-
 
 # fixation point
-def fixation(d):
-    d.rectangle((int(sz / 2) + eccentricity - f, int(sz / 2) + eccentricity + f * 3,
-                 int(sz / 2) + eccentricity + f, int(sz / 2) + eccentricity - f * 3),
+def fixation(d, e):
+    d.rectangle((int(sz / 2) + eccentricity*e - f, int(sz / 2) + eccentricity*e + f * 3,
+                 int(sz / 2) + eccentricity*e + f, int(sz / 2) + eccentricity*e - f * 3),
                 fill=(0, 0, 255), outline=None)
-    d.rectangle((int(sz / 2) + eccentricity - f * 3, int(sz / 2) + eccentricity + f,
-                 int(sz / 2) + eccentricity + f * 3, int(sz / 2) + eccentricity - f),
+    d.rectangle((int(sz / 2) + eccentricity*e - f * 3, int(sz / 2) + eccentricity*e + f,
+                 int(sz / 2) + eccentricity*e + f * 3, int(sz / 2) + eccentricity*e - f),
                 fill=(0, 0, 255), outline=None)
 
 
 # ls
-def stereogramize(disparity):
+def stereogramize(disparity, ecc):
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
+    img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
+    draw2 = ImageDraw.Draw(img2)
 
-    # stereoscopic dots
-    draw.rectangle((int(sz / 2) - int(f / 2) + f*disparity, int(sz / 2) + int(ll / 2),
-                    int(sz / 2) + int(f / 2) + f*disparity, int(sz / 2) - int(f) + int(ll / 2)),
-                   fill=(50, 50, 50), outline=None)
+    draw.rectangle((int(sz / 2) - int(f / 2) + f*disparity / 2, int(sz / 2) + int(ll / 2),
+                    int(sz / 2) + int(f / 2) + f*disparity / 2, int(sz / 2) - int(ll / 2)),
+                   fill=(0, 0, 0), outline=None)
 
-    draw.rectangle((int(sz / 2) - int(f / 2) + f*disparity, int(sz / 2) + int(f) - int(ll / 2),
-                    int(sz / 2) + int(f / 2) + f*disparity, int(sz / 2) - int(ll / 2)),
-                   fill=(50, 50, 50), outline=None)
+    draw2.rectangle((int(sz / 2) - int(f / 2) - f*disparity / 2, int(sz / 2) + int(ll / 2),
+                     int(sz / 2) + int(f / 2) - f*disparity / 2, int(sz / 2) - int(ll / 2)),
+                    fill=(0, 0, 0), outline=None)
 
-    fixation(draw)
+    fixation(draw, ecc)
+    fixation(draw2, ecc)
 
-    basename = os.path.basename(str(disparity) + 'ds.png')
+    basename = os.path.basename(str(disparity) + 'lsp' + str(ecc) + '.png')
     img.save(os.path.join(to_dir, basename), quality=100)
+    basename2 = os.path.basename(str(disparity) + 'lsn' + str(ecc) + '.png')
+    img2.save(os.path.join(to_dir, basename2), quality=100)
 
 
-for i in range(-8, 9, 2): #(-25, 26, 5):
-    stereogramize(i)
-
-
-# ls
-img = Image.new("RGB", (sz, sz), (lb, lb, lb))
-draw = ImageDraw.Draw(img)
-
-draw.rectangle((int(sz / 2) - int(f / 2), int(sz / 2) + int(ll / 2),
-                int(sz / 2) + int(f / 2), int(sz / 2) - int(ll / 2)),
-               fill=(0, 0, 0), outline=None)
-
-fixation(draw)
-
-
-basename = os.path.basename('ls.png')
-img.save(os.path.join(to_dir, basename), quality=100)
-
-
-# stereogram without stimuli
-img = Image.new("RGB", (sz, sz), (lb, lb, lb))
-draw = ImageDraw.Draw(img)
-
-fixation(draw)
+for i in variation:
+    stereogramize(i, 1)
+    stereogramize(i, 2)
 
 to_dir = 'materials'
 os.makedirs(to_dir, exist_ok=True)
-basename = os.path.basename('pedestal.png')
-img.save(os.path.join(to_dir, basename), quality=100)
+
+
+# stereogram without stimuli
+def pedestal(ecc):
+    img = Image.new("RGB", (sz, sz), (lb, lb, lb))
+    draw = ImageDraw.Draw(img)
+
+    fixation(draw, ecc)
+
+    basename = os.path.basename('pedestal' + str(ecc) + '.png')
+    img.save(os.path.join(to_dir, basename), quality=100)
+
+
+pedestal(1)
+pedestal(2)
 
 # sound files
 # special thank: @kinaonao  https://qiita.com/kinaonao/items/c3f2ef224878fbd232f5

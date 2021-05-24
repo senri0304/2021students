@@ -1,34 +1,39 @@
 # -*- coding: utf-8 -*-
-import os, pyglet, time, datetime, random, copy, math
-from typing import List, Any
+import datetime
+import math
+import os
+import pyglet
+import random
+import time
+from collections import deque
 
+import numpy as np
+import pandas as pd
 from pyglet.gl import *
 from pyglet.image import AbstractImage
-from collections import deque
-import pandas as pd
-import numpy as np
+
 import display_info
 
-# Preference
+# Prefernce
 # ------------------------------------------------------------------------
-rept = 3
+rept = 1
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
-# Get display information
+# Get display informations
 display = pyglet.canvas.get_display()
 screens = display.get_screens()
 win = pyglet.window.Window(style=pyglet.window.Window.WINDOW_STYLE_BORDERLESS)
-win.set_fullscreen(fullscreen=True, screen=screens[len(screens)-1])  # Present secondary display
+win.set_fullscreen(fullscreen=True, screen=screens[len(screens) - 1])  # Present secondary display
 win.set_exclusive_mouse(exclude_mousePointer)  # Exclude mouse pointer
 key = pyglet.window.key
 
 # Load variable conditions
 deg1 = display_info.deg1
-cntx = screens[len(screens)-1].width / 2  # Store center of screen about x position
-cnty = screens[len(screens)-1].height / 3  # Store center of screen about y position
+cntx = screens[len(screens) - 1].width / 2  # Store center of screen about x position
+cnty = screens[len(screens) - 1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
-iso = 7.5
+iso = 7.0
 draw_objects = []  # 描画対象リスト
 end_routine = False  # Routine status to be exitable or not
 tc = 0  # Count transients
@@ -43,36 +48,29 @@ n = 0
 # Load resources
 p_sound = pyglet.resource.media('materials/840Hz.wav', streaming=False)
 beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
-pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
-fixr = pyglet.sprite.Sprite(pedestal, x=cntx+iso*deg1-pedestal.width/2.0, y=cnty-pedestal.height/2.0)
-fixl = pyglet.sprite.Sprite(pedestal, x=cntx-iso*deg1-pedestal.width/2.0, y=cnty-pedestal.height/2.0)
+pedestal1: AbstractImage = pyglet.image.load('materials/pedestal1.png')
+pedestal2: AbstractImage = pyglet.image.load('materials/pedestal2.png')
+fixr1 = pyglet.sprite.Sprite(pedestal1, x=cntx + iso * deg1 - pedestal1.width / 2.0, y=cnty - pedestal1.height / 2.0)
+fixl1 = pyglet.sprite.Sprite(pedestal1, x=cntx - iso * deg1 - pedestal1.width / 2.0, y=cnty - pedestal1.height / 2.0)
+fixr2 = pyglet.sprite.Sprite(pedestal2, x=cntx + iso * deg1 - pedestal2.width / 2.0, y=cnty - pedestal2.height / 2.0)
+fixl2 = pyglet.sprite.Sprite(pedestal2, x=cntx - iso * deg1 - pedestal2.width / 2.0, y=cnty - pedestal2.height / 2.0)
 
-# disparities
-variation = list(range(-8, 9, 2))
-variation.remove(0)
-test_eye = [-1, 1]
+eccentricity = [1, 2]
 
-# measure only crossed disparity
 # Replicate for repetition
-variation2 = list(np.repeat(variation, rept))
-test_eye2 = list(np.repeat(test_eye, len(variation2)/2))
-
-# added zero disparity condition
-variation2.extend([0]*rept*len(test_eye))
-test_eye2.extend(test_eye*rept)
-
-print(variation2)
-print(test_eye2)
+variation2 = list(np.repeat(display_info.variation, rept*2))
+eccentricity2 = eccentricity*int((len(variation2)/2))
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))
 random.seed(r)
 sequence = random.sample(variation2, len(variation2))
 random.seed(r)
-sequence3 = random.sample(test_eye2, len(variation2))
+sequence2 = random.sample(eccentricity2, len(variation2))
+
 
 print(sequence)
-print(sequence3)
+print(sequence2)
 print(len(sequence))
 
 
@@ -106,14 +104,17 @@ resp_handler = key_resp()
 
 
 # Store objects into draw_objects
-def fixer():
-    draw_objects.append(fixl)
-    draw_objects.append(fixr)
+def fixer(seq2):
+    if seq2 != 1:
+        draw_objects.append(fixl2)
+        draw_objects.append(fixr2)
+    else:
+        draw_objects.append(fixl1)
+        draw_objects.append(fixr1)
 
 
 def replace():
     del draw_objects[:]
-    fixer()
     draw_objects.append(R)
     draw_objects.append(L)
 
@@ -124,7 +125,6 @@ def exit_routine(dt):
     exit = True
     beep_sound.play()
     prepare_routine()
-    fixer()
     pyglet.app.exit()
 
 
@@ -180,23 +180,23 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq, seq3):
+def set_polygon(seq, seq2):
     global L, R, n
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/ls.png')
+    R = pyglet.resource.image('stereograms/' + str(seq) + 'lsn' + str(seq2) + '.png')
     R = pyglet.sprite.Sprite(R)
-    R.x = cntx + deg1 * iso * seq3 - R.width / 2.0
+    R.x = cntx + deg1 * iso - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/' + str(seq) + 'ds.png')
+    L = pyglet.resource.image('stereograms/' + str(seq) + 'lsp' + str(seq2) + '.png')
     L = pyglet.sprite.Sprite(L)
-    L.x = cntx - deg1 * iso * seq3 - L.width / 2.0
+    L.x = cntx - deg1 * iso - L.width / 2.0
     L.y = cnty - L.height / 2.0
 
 
 def prepare_routine():
     if n < len(variation2):
-        fixer()
-        set_polygon(sequence[n], sequence3[n])
+        fixer(sequence2[n])
+        set_polygon(sequence[n], sequence2[n])
     else:
         pass
 
@@ -205,9 +205,8 @@ def prepare_routine():
 start = time.time()
 win.push_handlers(resp_handler)
 
-fixer()
-set_polygon(sequence[0], sequence3[0])
-
+fixer(sequence2[n])
+set_polygon(sequence[0], sequence2[0])
 
 for i in sequence:
     tc = 0  # Count transients
@@ -226,8 +225,8 @@ end_time = time.time()
 daten = datetime.datetime.now()
 
 # Write results onto csv
-results = pd.DataFrame({'angle': sequence,  # Store variance_A conditions
-                        'test_eye': sequence3,
+results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
+                        'eccentricity': sequence2,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

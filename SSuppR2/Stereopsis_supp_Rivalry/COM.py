@@ -1,34 +1,39 @@
 # -*- coding: utf-8 -*-
-import os, pyglet, time, datetime, random, copy, math
-from typing import List, Any
+import datetime
+import math
+import os
+import pyglet
+import random
+import time
+from collections import deque
 
+import numpy as np
+import pandas as pd
 from pyglet.gl import *
 from pyglet.image import AbstractImage
-from collections import deque
-import pandas as pd
-import numpy as np
+
 import display_info
 
-# Preference
+# Prefernce
 # ------------------------------------------------------------------------
-rept = 3
+rept = 1
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
-# Get display information
+# Get display informations
 display = pyglet.canvas.get_display()
 screens = display.get_screens()
 win = pyglet.window.Window(style=pyglet.window.Window.WINDOW_STYLE_BORDERLESS)
-win.set_fullscreen(fullscreen=True, screen=screens[len(screens)-1])  # Present secondary display
+win.set_fullscreen(fullscreen=True, screen=screens[len(screens) - 1])  # Present secondary display
 win.set_exclusive_mouse(exclude_mousePointer)  # Exclude mouse pointer
 key = pyglet.window.key
 
 # Load variable conditions
 deg1 = display_info.deg1
-cntx = screens[len(screens)-1].width / 2  # Store center of screen about x position
-cnty = screens[len(screens)-1].height / 3  # Store center of screen about y position
+cntx = screens[len(screens) - 1].width / 2  # Store center of screen about x position
+cnty = screens[len(screens) - 1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
-iso = 7.5
+iso = 7.0
 draw_objects = []  # 描画対象リスト
 end_routine = False  # Routine status to be exitable or not
 tc = 0  # Count transients
@@ -44,25 +49,21 @@ n = 0
 p_sound = pyglet.resource.media('materials/840Hz.wav', streaming=False)
 beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
 pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
-fixr = pyglet.sprite.Sprite(pedestal, x=cntx+iso*deg1-pedestal.width/2.0, y=cnty-pedestal.height/2.0)
-fixl = pyglet.sprite.Sprite(pedestal, x=cntx-iso*deg1-pedestal.width/2.0, y=cnty-pedestal.height/2.0)
+fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
+fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 
 # disparities
-variation = list(range(-8, 9, 2))
-variation.remove(0)
+variation = display_info.variation
 test_eye = [-1, 1]
 
 # measure only crossed disparity
 # Replicate for repetition
 variation2 = list(np.repeat(variation, rept))
-test_eye2 = list(np.repeat(test_eye, len(variation2)/2))
+test_eye2 = list(np.repeat(test_eye, len(variation2) / 2))
 
 # added zero disparity condition
-variation2.extend([0]*rept*len(test_eye))
-test_eye2.extend(test_eye*rept)
-
-print(variation2)
-print(test_eye2)
+# variation2.extend([0]*rept*len(test_eye))
+# test_eye2.extend(test_eye*rept)
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))
@@ -187,7 +188,7 @@ def set_polygon(seq, seq3):
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso * seq3 - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/' + str(seq) + 'ds.png')
+    L = pyglet.resource.image('stereograms/' + str(seq) + 'ls.png')
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso * seq3 - L.width / 2.0
     L.y = cnty - L.height / 2.0
@@ -208,7 +209,6 @@ win.push_handlers(resp_handler)
 fixer()
 set_polygon(sequence[0], sequence3[0])
 
-
 for i in sequence:
     tc = 0  # Count transients
     ku = deque([])  # Store unix time when key up
@@ -226,7 +226,7 @@ end_time = time.time()
 daten = datetime.datetime.now()
 
 # Write results onto csv
-results = pd.DataFrame({'angle': sequence,  # Store variance_A conditions
+results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
                         'test_eye': sequence3,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials

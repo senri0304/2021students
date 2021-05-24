@@ -38,7 +38,7 @@ ll = round(resolution * line_length / d_height)
 f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
 
 # Input the disparity at pixel units.
-disparity = f*2
+#disparity = f*2
 
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
@@ -57,27 +57,26 @@ def fixation(d):
 
 
 # ls
-def stereogramize(disparity):
+def stereogramize():
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
 
-    # stereoscopic dots
-    draw.rectangle((int(sz / 2) - int(f / 2) + f*disparity, int(sz / 2) + int(ll / 2),
-                    int(sz / 2) + int(f / 2) + f*disparity, int(sz / 2) - int(f) + int(ll / 2)),
-                   fill=(50, 50, 50), outline=None)
 
-    draw.rectangle((int(sz / 2) - int(f / 2) + f*disparity, int(sz / 2) + int(f) - int(ll / 2),
-                    int(sz / 2) + int(f / 2) + f*disparity, int(sz / 2) - int(ll / 2)),
-                   fill=(50, 50, 50), outline=None)
+    # rival dots
+    draw.rectangle((int(sz / 2) - int(f) + int(ll / 2), int(sz / 2) + int(f / 2),
+                    int(sz / 2) + int(ll / 2), int(sz / 2) - int(f / 2)),
+                   fill=(0, 0, 0), outline=None)
+    draw.rectangle((int(sz / 2) - int(ll / 2), int(sz / 2) + int(f / 2),
+                    int(sz / 2) + int(f) - int(ll / 2), int(sz / 2) - int(f / 2)),
+                   fill=(0, 0, 0), outline=None)
 
     fixation(draw)
 
-    basename = os.path.basename(str(disparity) + 'ds.png')
+    basename = os.path.basename('ds.png')
     img.save(os.path.join(to_dir, basename), quality=100)
 
 
-for i in range(-8, 9, 2): #(-25, 26, 5):
-    stereogramize(i)
+stereogramize()
 
 
 # ls

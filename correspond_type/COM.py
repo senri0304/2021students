@@ -11,7 +11,7 @@ import display_info
 
 # Prefernce
 # ------------------------------------------------------------------------
-rept = 1
+rept = 3
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
@@ -164,6 +164,7 @@ def delete(dt):
 
 
 def get_results(dt):
+    print(str(len(ku_test)) + str(len(kd_test)))
     if len(ku_test) != len(kd_test):
         ku_test.append(trial_start + 30.0)
     if len(ku_sup) != len(kd_sup):
