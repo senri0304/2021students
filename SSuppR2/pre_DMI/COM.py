@@ -26,7 +26,7 @@ key = pyglet.window.key
 # Load variable conditions
 deg1 = display_info.deg1
 cntx = screens[len(screens)-1].width / 2  # Store center of screen about x position
-cnty = screens[len(screens)-1].height / 3  # Store center of screen about y position
+cnty = screens[len(screens)-1].height / 10  # Store center of screen about y position
 dat = pd.DataFrame()
 iso = 7.0
 draw_objects = []  # 描画対象リスト

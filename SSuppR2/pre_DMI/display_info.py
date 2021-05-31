@@ -4,7 +4,7 @@
 import pyglet.canvas
 
 # Input display information
-inch = 23
+inch = 27
 aspect_width = 16
 aspect_height = 9
 
