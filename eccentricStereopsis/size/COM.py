@@ -36,13 +36,10 @@ dat = pd.DataFrame()
 iso = 7.0
 draw_objects = []  # 描画対象リスト
 end_routine = False  # Routine status to be exitable or not
-tc = 0  # Count transients
-tcs = []  # Store transients per trials
-kud_list = []  # Store durations of key pressed
-cdt = []  # Store sum(kud), cumulative reaction time on a trial.
-mdt = []
-dtstd = []
+latencies = []  # Store sum(kud), cumulative reaction time on a trial.
+trial_times = []
 exit = True
+oneshot = True
 n = 0
 
 # Load resources
@@ -79,25 +76,20 @@ print(len(sequence))
 # A getting key response function
 class key_resp(object):
     def on_key_press(self, symbol, modifiers):
-        global tc, exit, trial_start
-        if exit is False and symbol == key.DOWN:
-            kd.append(time.time())
-            tc = tc + 1
-        if exit is True and symbol == key.UP:
+        global tc, exit, trial_start, oneshot, kd
+        if exit is False and oneshot is True and symbol == key.DOWN:
+            kd = time.time()
+            oneshot = False
+            delete()
+        if exit is True and oneshot is True and symbol == key.UP:
             p_sound.play()
             exit = False
-            pyglet.clock.schedule_once(delete, 30.0)
-            replace()
+            pyglet.clock.schedule_once(replace, 0.5)
+            oneshot = False
             trial_start = time.time()
         if symbol == key.ESCAPE:
             win.close()
             pyglet.app.exit()
-
-    def on_key_release(self, symbol, modifiers):
-        global tc
-        if exit is False and symbol == key.DOWN:
-            ku.append(time.time())
-            tc = tc + 1
 
 
 resp_handler = key_resp()

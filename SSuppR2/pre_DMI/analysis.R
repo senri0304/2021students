@@ -6,7 +6,7 @@
 
 library(ggplot2)
 
-files <- list.files('SSuppR/pre_DMI/data',full.names=T)
+files <- list.files('SSuppR2/pre_DMI/data',full.names=T)
 f <- length(files)
 
 si <- gsub(".*(..)DATE.*","\\1", files)
@@ -44,7 +44,9 @@ g <- ggplot(temp, aes(x=0, y=cdt)) +
                          fun.data=mean_se,#mean_seで標準誤差、#mean_cl_normalで95%信頼区間(正規分布)
                          geom="errorbar",
                          size=0.5,#線の太さ
-                         width=0.1)
+                         width=0.1) +
+            stat_summary(x=0, data=aggregate(temp, by=temp$sub))
+
 
 g
 

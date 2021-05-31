@@ -51,7 +51,7 @@ fixl = pyglet.sprite.Sprite(pedestal, x=cntx-iso*deg1-pedestal.width/2.0, y=cnty
 test_eye = [-1, 1]
 
 # added zero disparity condition
-test_eye.extend(test_eye*rept)
+test_eye = test_eye*rept
 
 # Randomize
 r = random.randint(0, math.factorial(len(test_eye)))

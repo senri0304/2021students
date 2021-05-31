@@ -10,7 +10,7 @@ aspect_height = 9.0
 
 # Input a variety
 variation = list(range(-12, 13, 3))
-variation.remove(0)
+variation.insert(round(len(variation)/2), 0)
 
 
 # Get display information

@@ -72,6 +72,9 @@ sequence = random.sample(variation2, len(variation2))
 random.seed(r)
 sequence3 = random.sample(test_eye2, len(variation2))
 
+print(variation2)
+print(test_eye2)
+
 print(sequence)
 print(sequence3)
 print(len(sequence))

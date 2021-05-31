@@ -53,8 +53,7 @@ fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 - pedestal.width / 2.0
 fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 
 # disparities
-variation = list(range(-8, 9, 2))
-variation.remove(0)
+variation = display_info.variation
 test_eye = [-1, 1]
 
 # measure only crossed disparity
