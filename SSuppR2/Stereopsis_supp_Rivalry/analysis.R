@@ -47,7 +47,7 @@ for (i in usi){
                       size=0.5,#線の太さ
                       width=0.1) + #ぴょんって横に出てるアイツの幅
 #       stat_smooth(method = "lm", formula = y~x, fullrange = T, se = T,alpha=0.1) +
-       # -1が左眼、1が右眼にターゲットを提示する
+       # 1が左眼、-1が右眼にターゲットを提示する
        geom_point(aes(color=as.character(test_eye)),
                   position=position_jitter(width=0.3, height=0.06),
                   alpha=0.4, shape=21) +

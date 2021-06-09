@@ -16,7 +16,7 @@ import display_info
 
 # Prefernce
 # ------------------------------------------------------------------------
-rept = 1
+rept = 3
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
@@ -71,9 +71,6 @@ random.seed(r)
 sequence = random.sample(variation2, len(variation2))
 random.seed(r)
 sequence3 = random.sample(test_eye2, len(variation2))
-
-print(variation2)
-print(test_eye2)
 
 print(sequence)
 print(sequence3)
@@ -160,10 +157,11 @@ def get_results(dt):
     c = sum(kud)
     cdt.append(c)
     tcs.append(tc)
-    if kud is not None:
-        kud.append(0)
-    m = np.mean(kud)
-    d = np.std(kud)
+    if kud:
+        m = np.mean(kud)
+        d = np.std(kud)
+    else:
+        m, d = 0, 0
     mdt.append(m)
     dtstd.append(d)
     print("--------------------------------------------------")
@@ -175,7 +173,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
