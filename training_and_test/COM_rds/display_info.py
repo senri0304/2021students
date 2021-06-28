@@ -40,4 +40,4 @@ inner_size = [int(sz/4), int(sz/2)]
 
 # disparity; 3.6 min of arc * given parameter
 # note that this parameter proceed x2 under creating rds
-variation = [int(f), int(f*2)]
+variation = [int(f*3), int(f*6)]

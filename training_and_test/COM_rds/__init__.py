@@ -75,12 +75,14 @@ for i in range(1, 6):
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))
 draw = ImageDraw.Draw(img)
 
-#fixation(draw)
+fixation(draw)
+
+img_resize = img.resize((int(img.width * 2), int(img.height * 2)))
 
 to_dir = 'materials'
 os.makedirs(to_dir, exist_ok=True)
 basename = os.path.basename('pedestal.png')
-img.save(os.path.join(to_dir, basename), quality=100)
+img_resize.save(os.path.join(to_dir, basename), quality=100)
 
 # sound files
 # special thank: @kinaonao  https://qiita.com/kinaonao/items/c3f2ef224878fbd232f5

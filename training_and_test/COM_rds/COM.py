@@ -16,7 +16,7 @@ import display_info
 
 # Prefernce
 # ------------------------------------------------------------------------
-rept = 3
+cal = 40
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
@@ -49,32 +49,32 @@ n = 0
 p_sound = pyglet.resource.media('materials/840Hz.wav', streaming=False)
 beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
 pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
-fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
-fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
+fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 + cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
+fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 
 # disparities
-variation = display_info.variation
-variation2 = display_info.inner_size
-variation3 = list(range(1, 5))
+variation = display_info.variation*5
+variation2 = display_info.inner_size[1] #variation2 = display_info.inner_size
+variation3 = list(range(1, 6))*2
 
 # measure only crossed disparity
 # Replicate for repetition
-var = list(np.repeat(variation, rept))
-var2 = list(np.repeat(variation2, len(var) / 2))
-var3 = list(np.repeat(variation3, len(var) / 2))
+#var = list(np.repeat(variation, rept))
+#var2 = list(np.repeat(variation2, len(var) / 2))
+#var3 = list(np.repeat(variation3, len(var) / 2))
 
 # added zero disparity condition
 # variation2.extend([0]*rept*len(test_eye))
 # test_eye2.extend(test_eye*rept)
 
 # Randomize
-r = random.randint(0, math.factorial(len(variation2)))
+r = random.randint(0, math.factorial(len(variation)))
 random.seed(r)
-sequence = random.sample(var, len(var))
+sequence = random.sample(variation, len(variation))
 random.seed(r)
-sequence2 = random.sample(var2, len(var))
+sequence2 = [variation2]*len(variation) #sequence2 = random.sample(var2, len(var))
 random.seed(r)
-sequence3 = random.sample(var3, len(var))
+sequence3 = random.sample(variation3, len(variation))
 
 print(sequence)
 print(sequence2)
@@ -170,7 +170,7 @@ def get_results(dt):
     mdt.append(m)
     dtstd.append(d)
     print("--------------------------------------------------")
-    print("trial: " + str(n) + "/" + str(len(variation2)))
+    print("trial: " + str(n) + "/" + str(len(variation)))
     print("start: " + str(trial_start))
     print("end: " + str(trial_end))
     print("key_pressed: " + str(kud))
@@ -181,7 +181,7 @@ def get_results(dt):
     print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
-    if n != len(variation2):
+    if n != len(variation):
         pyglet.clock.schedule_once(exit_routine, 14.0)
     else:
         pyglet.app.exit()
@@ -192,16 +192,16 @@ def set_polygon(seq, seq2, seq3):
     # Set up polygon for stimulus
     R = pyglet.resource.image('stereograms/' + str(seq3) + 'rds' + str(seq) + str(seq2) + 'R.png')
     R = pyglet.sprite.Sprite(R)
-    R.x = cntx + deg1 * iso - R.width / 2.0
+    R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
     L = pyglet.resource.image('stereograms/' + str(seq3) + 'rds' + str(seq) + str(seq2) + 'L.png')
     L = pyglet.sprite.Sprite(L)
-    L.x = cntx - deg1 * iso - L.width / 2.0
+    L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0
 
 
 def prepare_routine():
-    if n < len(var):
+    if n < len(variation):
         fixer()
         set_polygon(sequence[n], sequence2[n], sequence3[n])
     else:
