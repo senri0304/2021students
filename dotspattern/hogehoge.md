@@ -9,9 +9,9 @@
 
 ![fig.1](added_dots/stereograms/2ls01.png "線分とドット配置の一例")　　　![fig.1](added_dots/stereograms/0ls0-1.png "線分とドット配置の一例")
 
-![fig.1](added_dots/stereograms/5ls01.png "線分とドット配置の一例")　　　![fig.1](added_dots/stereograms/0ls0-1.png "線分とドット配置の一例")
+![fig.1](added_dots/stereograms/8ls01.png "線分とドット配置の一例")　　　![fig.1](added_dots/stereograms/0ls0-1.png "線分とドット配置の一例")
 
-![fig.1](added_dots/stereograms/5ls11.png "線分とドット配置の一例")　　　![fig.1](added_dots/stereograms/0ls0-1.png "線分とドット配置の一例")
+![fig.1](added_dots/stereograms/8ls21.png "線分とドット配置の一例")　　　![fig.1](added_dots/stereograms/0ls0-1.png "線分とドット配置の一例")
 
 図1. ドットが配置されたの線画ステレオグラム。この3種を実験に用いた。上段がドットが近く、中段が遠い。下段は近いドットと遠いドットの組み合わせであり、ドット配列長が長い。
 
