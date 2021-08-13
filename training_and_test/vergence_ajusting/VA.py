@@ -92,7 +92,6 @@ class key_resp(object):
             pyglet.clock.schedule_once(replace, 0.1)
             trial_start = time.time()
         if exit is False and symbol == key.RETURN:
-            exit = True
             get_results()
             n += 1
         if symbol == key.ESCAPE:

@@ -5,6 +5,7 @@
 # List up files
 
 library(ggplot2)
+library(tidyr)
 
 files <- list.files('SSuppR2/Stereopsis_supp_Rivalry/data',full.names=T)
 f <- length(files)
@@ -36,7 +37,7 @@ for (i in usi){
   camp <- subset(temp3, sub==i)
   # The y-axis indicates the visibility probability of the target
 
-  #キャンバスを用意して、gに格納
+  # red symbols (-1) present the cdt of the test bar in the right eye
   g <- ggplot(camp, aes(y=cdt, x=cnd)) +
        # 折れ線グラフを描き入れる
        stat_summary(fun=mean, geom="point", colour="black") +
@@ -46,8 +47,8 @@ for (i in usi){
        # 試行ごとのデータを表示, -1が左眼、1が右眼にターゲットを提示
        geom_point(aes(color=as.character(test_eye)), position=position_jitter(width=0.3, height=0), alpha=0.4, shape=21) +
        # 単回帰分析
-       stat_smooth(method = "lm", formula = y~x, fullrange = T, se = T,alpha=0.1, mapping=aes(y=cdt, x=cnd)) +
-       stat_poly_eq(formula=y~x, aes(label=paste(stat(eq.label), stat(rr.label), stat(f.value.label), stat(p.value.label), sep = "~~~")), parse = TRUE) +
+#       stat_smooth(method = "lm", formula = y~x, fullrange = T, se = T,alpha=0.1, mapping=aes(y=cdt, x=cnd)) +
+#       stat_poly_eq(formula=y~x, aes(label=paste(stat(eq.label), stat(rr.label), stat(f.value.label), stat(p.value.label), sep = "~~~")), parse = TRUE) +
        # グラフの整形
        labs(subtitle=i, color='eye') + ylim(-0.2, max(temp3$cdt)+0.2) +
        xlab('disparity') + theme(text = element_text(size = 20)) +
@@ -78,7 +79,6 @@ g <- ggplot(temp3, aes(x=cnd, y=cdt)) +
 
 g
 
-library(tidyr)
 # ANOVA
 df <- aggregate(temp3$cdt, by=temp3[c('sub', 'cnd')], FUN=mean)
 df_shaped <- pivot_wider(df, names_from=cnd, values_from=x)

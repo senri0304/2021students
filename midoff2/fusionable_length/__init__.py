@@ -1,12 +1,43 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os, wave, struct
+import os, pyglet, wave, struct
+import numpy as np
 from PIL import Image, ImageDraw
 from display_info import *
 
 to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
+
+# Input stereogram size in cm unit
+size = 5.0
+
+# Input line size in cm unit
+line_length = 0.7  # 30pix is 42 min of arc on 57cm distance
+
+# Input luminance of background
+lb = 85  # 215, 84%
+
+# Input fixation point position in cm unit
+ecc = 1
+
+# Get display information
+display = pyglet.canvas.get_display()
+screens = display.get_screens()
+
+resolution = screens[len(screens) - 1].height
+
+c = (aspect_width ** 2 + aspect_height ** 2) ** 0.5
+d_height = 2.54 * (aspect_height / c) * inch
+
+sz = round(resolution * (size / d_height))
+ll = round(resolution * line_length / d_height)
+f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
+
+# Input the disparity at pixel units.
+disparity = f*2
+
+eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
 
 # fixation point
@@ -19,40 +50,37 @@ def fixation(d):
                 fill=(0, 0, 255), outline=None)
 
 
-# Generate RDSs
-def stereogramize(l=1):
-    # Two images prepare
-    img = Image.new("RGB", (int(sz), int(sz)), (lb, lb, lb))
+# ls
+def stereogramize(m):
+    img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
+    img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
+    draw2 = ImageDraw.Draw(img2)
 
-    draw.rectangle((int(sz / 2) - int(ll / 2) * l, int(sz / 2) + int(f / 2),
-                    int(sz / 2) + int(ll / 2) * l, int(sz / 2) - int(f / 2)),
+    # stereoscopic stimulus
+    draw.rectangle((int(sz / 2) - int(f / 2), int(sz / 2) + int(ll / 2)*m,
+                    int(sz / 2) + int(f / 2), int(sz / 2) - int(ll / 2)*m),
                    fill=(0, 0, 0), outline=None)
 
+    draw2.rectangle((int(sz / 2) - int(f / 2), int(sz / 2) + int(ll / 2)*m,
+                     int(sz / 2) + int(f / 2), int(sz / 2) - int(ll / 2)*m),
+                    fill=(0, 0, 0), outline=None)
+
+    draw.rectangle((int(sz / 2) - int(f), int(sz / 2) + int(ll / 4),
+                    int(sz / 2) + int(f), int(sz / 2) - int(ll / 4)),
+                   fill=(lb, lb, lb), outline=None)
+
     fixation(draw)
+    fixation(draw2)
 
-    # Write images
-    basename = os.path.basename('ls' + str(float(l)) + '.png')
+    basename = os.path.basename(str(m) + 'rls.png')
     img.save(os.path.join(to_dir, basename), quality=100)
+    basename = os.path.basename(str(m) + 'ls.png')
+    img2.save(os.path.join(to_dir, basename), quality=100)
 
 
-for i in [0.5, 1, 2, 4]:
+for i in variation:
     stereogramize(i)
-
-
-# ls
-img = Image.new("RGB", (sz, sz), (lb, lb, lb))
-draw = ImageDraw.Draw(img)
-
-draw.rectangle((int(sz / 2) - int(f / 2), int(sz / 2) + int(ll / 2),
-                int(sz / 2) + int(f / 2), int(sz / 2) - int(ll / 2)),
-               fill=(int(lb*1.5), 0, 0), outline=None)
-
-fixation(draw)
-
-
-basename = os.path.basename('ls.png')
-img.save(os.path.join(to_dir, basename), quality=100)
 
 
 # stereogram without stimuli

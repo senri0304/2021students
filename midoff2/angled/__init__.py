@@ -1,12 +1,43 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os, wave, struct
+import os, pyglet, wave, struct
+import numpy as np
 from PIL import Image, ImageDraw
 from display_info import *
 
 to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
+
+# Input stereogram size in cm unit
+size = 5.0
+
+# Input line size in cm unit
+line_length = 0.7  # 30pix is 42 min of arc on 57cm distance
+
+# Input luminance of background
+lb = 85  # 215, 84%
+
+# Input fixation point position in cm unit
+ecc = 1
+
+# Get display information
+display = pyglet.canvas.get_display()
+screens = display.get_screens()
+
+resolution = screens[len(screens) - 1].height
+
+c = (aspect_width ** 2 + aspect_height ** 2) ** 0.5
+d_height = 2.54 * (aspect_height / c) * inch
+
+sz = round(resolution * (size / d_height))
+ll = round(resolution * line_length / d_height)
+f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
+
+# Input the disparity at pixel units.
+disparity = f*2
+
+eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
 
 # fixation point
@@ -19,39 +50,25 @@ def fixation(d):
                 fill=(0, 0, 255), outline=None)
 
 
-# Generate RDSs
-def stereogramize(l=1):
-    # Two images prepare
-    img = Image.new("RGB", (int(sz), int(sz)), (lb, lb, lb))
+
+def mask(angle):
+    img = Image.new("L", (sz, sz), 0)
     draw = ImageDraw.Draw(img)
-
-    draw.rectangle((int(sz / 2) - int(ll / 2) * l, int(sz / 2) + int(f / 2),
-                    int(sz / 2) + int(ll / 2) * l, int(sz / 2) - int(f / 2)),
-                   fill=(0, 0, 0), outline=None)
-
-    fixation(draw)
-
-    # Write images
-    basename = os.path.basename('ls' + str(float(l)) + '.png')
+    draw.rectangle((int(sz / 2) - int(ll / 2), int(sz / 2) + int(f / 2),
+                    int(sz / 2) + int(ll / 2), int(sz / 2) - int(f / 2)),
+                   fill=255, outline=None)
+    img = img.rotate(angle, resample=Image.BICUBIC)
+    basename = os.path.basename('mask' + str(angle) + '.png')
     img.save(os.path.join(to_dir, basename), quality=100)
 
 
-for i in [0.5, 1, 2, 4]:
-    stereogramize(i)
+for i in variation:
+    mask(i)
 
 
-# ls
-img = Image.new("RGB", (sz, sz), (lb, lb, lb))
-draw = ImageDraw.Draw(img)
-
-draw.rectangle((int(sz / 2) - int(f / 2), int(sz / 2) + int(ll / 2),
-                int(sz / 2) + int(f / 2), int(sz / 2) - int(ll / 2)),
-               fill=(int(lb*1.5), 0, 0), outline=None)
-
-fixation(draw)
-
-
-basename = os.path.basename('ls.png')
+# black bg
+img = Image.new("RGB", (sz, sz), (0, 0, 0))
+basename = os.path.basename('bbg.png')
 img.save(os.path.join(to_dir, basename), quality=100)
 
 
@@ -65,6 +82,22 @@ to_dir = 'materials'
 os.makedirs(to_dir, exist_ok=True)
 basename = os.path.basename('pedestal.png')
 img.save(os.path.join(to_dir, basename), quality=100)
+
+
+def stereogramize(angle):
+    img = Image.open('materials/pedestal.png')
+    # 貼り付ける画像の左上の座標
+    mask_im = Image.open('materials/mask' + str(angle) + '.png')
+    bbg = Image.open('materials/bbg.png')
+    img.paste(bbg, (0, 0), mask_im)
+
+    basename = os.path.basename(str(angle) + 'ls.png')
+    img.save(os.path.join(to_dir, basename), quality=100)
+
+
+for i in variation:
+    stereogramize(i)
+
 
 # sound files
 # special thank: @kinaonao  https://qiita.com/kinaonao/items/c3f2ef224878fbd232f5

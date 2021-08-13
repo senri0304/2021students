@@ -16,7 +16,7 @@ import display_info
 
 # Prefernce
 # ------------------------------------------------------------------------
-cal = 40
+cal = -60
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ deg1 = display_info.deg1
 cntx = screens[len(screens) - 1].width / 2  # Store center of screen about x position
 cnty = screens[len(screens) - 1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
-iso = 7.0
+iso = 8.0
 draw_objects = []  # 描画対象リスト
 end_routine = False  # Routine status to be exitable or not
 tc = 0  # Count transients
@@ -91,6 +91,8 @@ class key_resp(object):
         if exit is False and symbol == key.DOWN:
             kd.append(time.time())
             tc = tc + 1
+#            pyglet.clock.schedule_once(delete, 0.001)
+#            pyglet.clock.unschedule(delete)
         if exit is True and symbol == key.UP:
             p_sound.play()
             exit = False
@@ -100,13 +102,11 @@ class key_resp(object):
         if symbol == key.ESCAPE:
             win.close()
             pyglet.app.exit()
-
     def on_key_release(self, symbol, modifiers):
         global tc
         if exit is False and symbol == key.DOWN:
             ku.append(time.time())
             tc = tc + 1
-
 
 resp_handler = key_resp()
 
@@ -119,7 +119,6 @@ def fixer():
 
 def replace():
     del draw_objects[:]
-    fixer()
     draw_objects.append(R)
     draw_objects.append(L)
 

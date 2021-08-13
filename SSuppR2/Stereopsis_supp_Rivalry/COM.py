@@ -17,6 +17,7 @@ import display_info
 # Prefernce
 # ------------------------------------------------------------------------
 rept = 3
+cal = -95
 exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
@@ -33,7 +34,7 @@ deg1 = display_info.deg1
 cntx = screens[len(screens) - 1].width / 2  # Store center of screen about x position
 cnty = screens[len(screens) - 1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
-iso = 7.0
+iso = 8.0
 draw_objects = []  # 描画対象リスト
 end_routine = False  # Routine status to be exitable or not
 tc = 0  # Count transients
@@ -49,8 +50,8 @@ n = 0
 p_sound = pyglet.resource.media('materials/840Hz.wav', streaming=False)
 beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
 pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
-fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
-fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
+fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 + cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
+fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 
 # disparities
 variation = display_info.variation
@@ -187,11 +188,11 @@ def set_polygon(seq, seq3):
     # Set up polygon for stimulus
     R = pyglet.resource.image('stereograms/ls.png')
     R = pyglet.sprite.Sprite(R)
-    R.x = cntx + deg1 * iso * seq3 - R.width / 2.0
+    R.x = cntx + deg1 * iso * seq3 + cal*seq3 - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/' + str(seq) + 'ls.png')
+    L = pyglet.resource.image('stereograms/' + str(seq) + 'ls.png') # the test bar
     L = pyglet.sprite.Sprite(L)
-    L.x = cntx - deg1 * iso * seq3 - L.width / 2.0
+    L.x = cntx - deg1 * iso * seq3 - cal*seq3 - L.width / 2.0
     L.y = cnty - L.height / 2.0
 
 

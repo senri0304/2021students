@@ -29,7 +29,7 @@ for (i in usi){
   camp <- subset(temp2, sub==i)
   # The y-axis indicates the visibility probability of the target
 
-  #キャンバスを用意して、gに格納
+  # red (-1) present the cdt of test bar in the left eye
   g <- ggplot(camp, aes(x=0, y=cdt, color=as.character(test_eye))) +
     geom_point(stat='identity') +
     stat_summary(fun=mean, geom='point', color='black') +
