@@ -35,7 +35,7 @@ ll = round(resolution * line_length / d_height)
 f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
 
 # Input the disparity at pixel units.
-disparity = f*1.5 # 3.0pix, approximately 3*1.5 = 4.5'
+disparity = 2 # 3.0pix, approximately 3*1.5 = 4.5'
 
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
@@ -49,83 +49,64 @@ def fixation(d):
                  int(sz / 2) + eccentricity + f * 3, int(sz / 2) + eccentricity - f),
                 fill=(0, 0, 255), outline=None)
 
-ln = 0.75
+    d.rectangle((int(sz / 2) + eccentricity, int(sz / 2) + eccentricity,
+                 int(sz / 2) - eccentricity, int(sz / 2) + eccentricity),
+                fill=(0, 0, 255), outline=None)
+    d.rectangle((int(sz / 2) - eccentricity, int(sz / 2) + eccentricity,
+                 int(sz / 2) - eccentricity, int(sz / 2) - eccentricity),
+                fill=(0, 0, 255), outline=None)
+    d.rectangle((int(sz / 2) - eccentricity, int(sz / 2) - eccentricity,
+                 int(sz / 2) + eccentricity, int(sz / 2) - eccentricity),
+                fill=(0, 0, 255), outline=None)
+    d.rectangle((int(sz / 2) + eccentricity, int(sz / 2) - eccentricity,
+                 int(sz / 2) + eccentricity, int(sz / 2) + eccentricity),
+                fill=(0, 0, 255), outline=None)
+
+
 # ls
-def stereogramize(n, m=1, t=1):
+def stereogramize(d):
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
+    img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
+    draw2 = ImageDraw.Draw(img2)
 
     distance = 2 # 2 dots correspond half of bar's width
 
+    #img right eye
     # stereoscopic stimulus
-#    draw.rectangle((int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + int(ll / 2),
-#                    int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - int(ll / 2)),
-#                   fill=(0, 0, 0), outline=None)
+    draw.rectangle((int(sz / 2) - int(f / 2) - distance*3 - disparity, int(sz / 2) + int(ll / 2),
+                    int(sz / 2) + int(f / 2) - distance*3 - disparity, int(sz / 2) - int(ll / 2)),
+                   fill=(0, 0, 0), outline=None)
 
     # dots
-    draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) + int(ll*ln),
-                    int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + int(f) + int(ll*ln)),
+    draw.rectangle((int(sz / 2) + int(f / 2) + distance*3 + d, int(sz / 2) + distance + int(ll / 2),
+                    int(sz / 2) - int(f / 2) + distance*3 + d, int(sz / 2) + distance + int(f) + int(ll / 2)),
                    fill=(0, 0, 0), outline=None)
 
-    draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - int(ll*ln),
-                    int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) - int(f) - int(ll*ln)),
+    draw.rectangle((int(sz / 2) + int(f / 2) + distance*3 + d, int(sz / 2) - distance - int(ll / 2),
+                    int(sz / 2) - int(f / 2) + distance*3 + d, int(sz / 2) - distance - int(f) - int(ll / 2)),
                    fill=(0, 0, 0), outline=None)
 
-    if m == 1:
-        draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - distance*n + int(ll*ln),
-                        int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) - distance*n + int(f) + int(ll*ln)),
-                       fill=(0, 0, 0), outline=None)
-        draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) + distance*n - int(ll*ln),
-                        int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + distance*n - int(f) - int(ll*ln)),
-                       fill=(0, 0, 0), outline=None)
-
-#    if m == 2:
-#        draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) + distance*2 + int(ll / 2),
-#                        int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + distance*2 + int(f) + int(ll / 2)),
-#                       fill=(0, 0, 0), outline=None)
-#        draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - distance*2 - int(ll / 2),
-#                        int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) - distance*2 - int(f) - int(ll / 2)),
-#                       fill=(0, 0, 0), outline=None)
-#        draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) + distance*5 + int(ll / 2),
-#                        int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + distance*5 + int(f) + int(ll / 2)),
-#                       fill=(0, 0, 0), outline=None)
-#        draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - distance*5 - int(ll / 2),
-#                        int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) - distance*5 - int(f) - int(ll / 2)),
-#                       fill=(0, 0, 0), outline=None)
-    else:
-        pass
+    # img2 left eye
+    # stereoscopic stimulus
+    draw2.rectangle((int(sz / 2) - int(f / 2) + distance*3 - d, int(sz / 2) + int(ll / 2),
+                     int(sz / 2) + int(f / 2) + distance*3 - d, int(sz / 2) - int(ll / 2)),
+                    fill=(0, 0, 0), outline=None)
+    draw2.rectangle((int(sz / 2) - int(f / 2) - distance*3 + disparity, int(sz / 2) + int(ll / 2),
+                     int(sz / 2) + int(f / 2) - distance*3 + disparity, int(sz / 2) - int(ll / 2)),
+                    fill=(0, 0, 0), outline=None)
 
     fixation(draw)
+    fixation(draw2)
 
-    basename = os.path.basename(str(n) + 'ls' + str(m) + str(t) +'.png')
+    basename = os.path.basename(str(d) + 'r.png')
     img.save(os.path.join(to_dir, basename), quality=100)
+    basename = os.path.basename(str(d) + 'l.png')
+    img2.save(os.path.join(to_dir, basename), quality=100)
 
 
-stereogramize(2)
-stereogramize(4)
-stereogramize(2, 1, -1)
-stereogramize(4, 1, -1)
-stereogramize(8, 1)
-stereogramize(8, 1, -1)
-
-
-# ls
-def ls(t):
-    img = Image.new("RGB", (sz, sz), (lb, lb, lb))
-    draw = ImageDraw.Draw(img)
-
-    draw.rectangle((int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + int(ll*ln) + f,
-                    int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - int(ll*ln) - f),
-                   fill=(0, 0, 0), outline=None)
-
-    fixation(draw)
-
-    basename = os.path.basename('0ls0' + str(t) + '.png')
-    img.save(os.path.join(to_dir, basename), quality=100)
-
-
-ls(1)
-ls(-1)
+for i in variation:
+    stereogramize(i)
 
 
 # stereogram without stimuli
