@@ -40,6 +40,25 @@ disparity = 4 # 3.0pix, approximately 3*1.5 = 4.5'
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
 
+# calculate disparity gradient
+def disparity_grad(x1_l, x1_r, x2_l, x2_r):
+    # cyclopian position
+    x1 = (x1_l + x1_r) / 2.0
+    x2 = (x2_l + x2_r) / 2.0
+    R_b = x1 - x2
+
+    # disparity
+    d_x1 = float(x1_l - x1_r)
+    d_x2 = float(x2_l - x2_r)
+    relative_d = d_x1 - d_x2
+
+    try:
+        disparity_gradient = float(relative_d) / float(R_b)
+    except ZeroDivisionError:
+        disparity_gradient = 0
+    return disparity_gradient
+
+
 # fixation point
 def fixation(d):
     d.rectangle((int(sz / 2) - f, int(sz / 2) + eccentricity + f * 3,
@@ -102,6 +121,8 @@ for i in variation:
     stereogramize(i)
 stereogramize(-6, True)
 
+for d in variation:
+    print(disparity_grad(2 * 3 + d, 2 * 3 - d, -2*3 + 2, -2*3 - 2))
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))
