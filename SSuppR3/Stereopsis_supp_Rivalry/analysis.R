@@ -110,7 +110,7 @@ t_dat <- data.frame(a$x, w$x[w$cnd==0])
 colnames(t_dat) <- c('dmi', 'ssup')
 t.test(x=t_dat$dmi, y=t_dat$ssup, paired=T)
 
-# effect size
+# effect relative_size
 diff <- mean(t_dat$dmi) - mean(t_dat$ssup)
 sd_pooled <- (sd(t_dat$dmi) + sd(t_dat$ssup)) / 2
 cd <- diff / sd_pooled

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os, pyglet, wave, struct
+import os, wave, struct, copy
 import numpy as np
 from PIL import Image, ImageDraw
 from display_info import *
@@ -9,10 +9,10 @@ from display_info import *
 to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
-# Input stereogram size in cm unit
+# Input stereogram relative_size in cm unit
 size = 2.0
 
-# Input line size in cm unit
+# Input line relative_size in cm unit
 line_length = 0.5  # 30pix is 42 min of arc on 57cm distance
 
 # Input luminance of background
@@ -40,8 +40,22 @@ disparity = 4 # 3.0pix, approximately 3*1.5 = 4.5'
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
 
+def pattern(shape=(sz, sz)):
+    rands = np.random.randint(0, 2, shape)
+    offset = np.random.randint(0, 2, shape)
+    for i in range(0, rands.shape[1]):
+        randrow = list(rands[i, ])
+        del randrow[0:i]
+        randrow.extend(list(offset[i:shape[1]]))
+        print(randrow)
+        rands[i, ] = randrow
+    return rands
+
+
+pat = pattern()
+
 # rds
-def stereogramize(disparity, inner, num):
+def stereogramize(disparity, inner, pat):
     # Two images prepare
     img = Image.new("RGB", (int(sz), int(sz)), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
@@ -49,39 +63,32 @@ def stereogramize(disparity, inner, num):
     img2 = Image.new("RGB", (int(sz), int(sz)), (lb, lb, lb))
     draw2 = ImageDraw.Draw(img2)
 
-    # Draw the planes of RDSs
-    for i in range(0, int(sz)):
-        for j in range(1, int(sz) + 1):
-            x = np.round(np.random.binomial(1, 0.5, 1)) * j
-            draw.point((x - 1, i), fill=(0, 0, 0))
-            draw2.point((x - 1, i), fill=(0, 0, 0))
-
     # Fill the targets area
-    draw.rectangle((int(sz / 2) - int(inner / 2) - disparity / 2, 0,
-                    int(sz / 2) + int(inner / 2) - disparity / 2, sz), fill=(lb, lb, lb),
-                   outline=None)
-    draw2.rectangle((int(sz / 2) - int(inner / 2) + disparity / 2, 0,
-                     int(sz / 2) + int(inner / 2) + disparity / 2, sz), fill=(lb, lb, lb),
-                    outline=None)
+#    draw.rectangle((int(sz / 2) - int(inner / 2) - disparity / 2, 0,
+#                    int(sz / 2) + int(inner / 2) - disparity / 2, sz), fill=(lb, lb, lb),
+#                   outline=None)
+#    draw2.rectangle((int(sz / 2) - int(inner / 2) + disparity / 2, 0,
+#                     int(sz / 2) + int(inner / 2) + disparity / 2, sz), fill=(lb, lb, lb),
+#                    outline=None)
 
     # Drawing the targets
     for i in range(0, int(sz)):
-        for j in range(0, int(inner) + 1):
-            x = np.round(np.random.binomial(1, 0.5, 1)) * (1 + j)
-            if x != 0:
-                draw.point((x + ((sz / 2) - (inner / 2)) - 1 - disparity / 2, i), fill=(0, 0, 0))
-                draw2.point((x + (sz / 2) - (inner / 2) - 1 + disparity / 2, i), fill=(0, 0, 0))
+        for j in range(0, int(sz) + 1):
+            if pat != 0:
+                draw.point((pat + ((sz / 2) - (inner / 2)) - 1 - disparity / 2, i), fill=(0, 0, 0))
+                draw2.point((pat + (sz / 2) - (inner / 2) - 1 + disparity / 2, i), fill=(0, 0, 0))
 
     img_resize = img.resize((int(img.width*2), int(img.height*2)))
     img2_resize = img2.resize((int(img2.width*2), int(img2.height*2)))
 
     # Write images
-    basenameR = os.path.basename(str(num) + 'rds' + str(disparity) + str(inner) + 'R.png')
-    basenameL = os.path.basename(str(num) + 'rds' + str(disparity) + str(inner) + 'L.png')
+    basenameR = os.path.basename('rds' + str(disparity) + str(inner) + 'R.png')
+    basenameL = os.path.basename('rds' + str(disparity) + str(inner) + 'L.png')
     img_resize.save(os.path.join(to_dir, basenameR), quality=100)
     img2_resize.save(os.path.join(to_dir, basenameL), quality=100)
 
-stereogramize(6, sz/2, 1)
+
+stereogramize(6, sz/2, sz)
 
 
 # stereogram without stimuli

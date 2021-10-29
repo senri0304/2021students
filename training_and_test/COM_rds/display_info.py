@@ -9,7 +9,7 @@ inch = 23.0
 aspect_width = 16.0
 aspect_height = 9.0
 
-# Input stereogram size in cm unit
+# Input stereogram relative_size in cm unit
 size = 5
 
 # Input luminance of background
@@ -35,7 +35,7 @@ f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually
 
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
-# Input target size in cm unit
+# Input target relative_size in cm unit
 inner_size = [int(sz/4), int(sz/2)]
 
 # disparity; 3.6 min of arc * given parameter

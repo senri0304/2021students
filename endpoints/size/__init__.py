@@ -10,13 +10,10 @@ to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
 # Input stereogram relative_size in cm unit
-size = 5
+size = 5.0
 
 # Input line relative_size in cm unit
-line_length = 0.7  # 30pix is 42 min of arc on 57cm distance
-
-# Input a number you like to initiate
-s = 1
+line_length = 1.0  # 30pix is 42 min of arc on 57cm distance
 
 # Input luminance of background
 lb = 85  # 215, 84%
@@ -38,12 +35,9 @@ ll = round(resolution * line_length / d_height)
 f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
 
 # Input the disparity at pixel units.
-disparity = f*2
+disparity = 4 # 3.0pix, approximately 3*1.5 = 4.5'
 
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
-
-# array of variable 2
-variation2 = list(np.repeat([1, -1], len(variation)))
 
 
 # fixation point
@@ -55,45 +49,49 @@ def fixation(d):
                  int(sz / 2) + eccentricity + f * 3, int(sz / 2) + eccentricity - f),
                 fill=(0, 0, 255), outline=None)
 
+    d.rectangle((int(sz / 2) + eccentricity, int(sz / 2) + eccentricity,
+                 int(sz / 2) - eccentricity, int(sz / 2) + eccentricity),
+                fill=(0, 0, 255), outline=None)
+    d.rectangle((int(sz / 2) - eccentricity, int(sz / 2) + eccentricity,
+                 int(sz / 2) - eccentricity, int(sz / 2) - eccentricity),
+                fill=(0, 0, 255), outline=None)
+    d.rectangle((int(sz / 2) - eccentricity, int(sz / 2) - eccentricity,
+                 int(sz / 2) + eccentricity, int(sz / 2) - eccentricity),
+                fill=(0, 0, 255), outline=None)
+    d.rectangle((int(sz / 2) + eccentricity, int(sz / 2) - eccentricity,
+                 int(sz / 2) + eccentricity, int(sz / 2) + eccentricity),
+                fill=(0, 0, 255), outline=None)
+
 
 # ls
-def stereogramize(disparity):
+def stereogramize(ty, ry, d, offset):
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
+    img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
+    draw2 = ImageDraw.Draw(img2)
 
-    # stereoscopic dots
-    draw.rectangle((int(sz / 2) - int(f / 2) + f*disparity, int(sz / 2) + int(ll / 2),
-                    int(sz / 2) + int(f / 2) + f*disparity, int(sz / 2) - int(f) + int(ll / 2)),
-                   fill=(50, 50, 50), outline=None)
-
-    draw.rectangle((int(sz / 2) - int(f / 2) + f*disparity, int(sz / 2) + int(f) - int(ll / 2),
-                    int(sz / 2) + int(f / 2) + f*disparity, int(sz / 2) - int(ll / 2)),
-                   fill=(50, 50, 50), outline=None)
+    # stereoscopic stimulus
+    draw.rectangle((int(sz / 2) + int(f / 2) - d, int(sz / 2) + int(ry / 2),
+                    int(sz / 2) - int(f / 2) - d, int(sz / 2) + round(offset)),
+                   fill=(0, 0, 0), outline=None)
+    draw.rectangle((int(sz / 2) + int(f / 2) - d, int(sz / 2) - int(ry / 2),
+                    int(sz / 2) - int(f / 2) - d, int(sz / 2) - round(offset)),
+                   fill=(0, 0, 0), outline=None)
+    draw2.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) + int(ty / 2),
+                     int(sz / 2) + int(f / 2) + d, int(sz / 2) - int(ty / 2)),
+                    fill=(int(lb*1.5), 0, 0), outline=None)
 
     fixation(draw)
+    fixation(draw2)
 
-    basename = os.path.basename(str(disparity) + 'ds.png')
+    basename = os.path.basename(str(ry) + str(d) + 'r.png')
     img.save(os.path.join(to_dir, basename), quality=100)
+    basename = os.path.basename(str(ty) + str(d) + 't.png')
+    img2.save(os.path.join(to_dir, basename), quality=100)
 
 
-for i in range(-8, 9, 2): #(-25, 26, 5):
-    stereogramize(i)
-
-
-# ls
-img = Image.new("RGB", (sz, sz), (lb, lb, lb))
-draw = ImageDraw.Draw(img)
-
-draw.rectangle((int(sz / 2) - int(f / 2), int(sz / 2) + int(ll / 2),
-                int(sz / 2) + int(f / 2), int(sz / 2) - int(ll / 2)),
-               fill=(0, 0, 0), outline=None)
-
-fixation(draw)
-
-
-basename = os.path.basename('ls.png')
-img.save(os.path.join(to_dir, basename), quality=100)
-
+for i in variation:
+    stereogramize(i, i, 0, ll/10)
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))

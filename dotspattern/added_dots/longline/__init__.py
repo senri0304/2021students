@@ -9,10 +9,10 @@ from display_info import *
 to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
-# Input stereogram size in cm unit
+# Input stereogram relative_size in cm unit
 size = 5.0
 
-# Input line size in cm unit
+# Input line relative_size in cm unit
 line_length = 0.7  # 30pix is 42 min of arc on 57cm distance
 
 # Input luminance of background

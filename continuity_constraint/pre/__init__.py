@@ -9,10 +9,10 @@ from display_info import *
 to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
-# Input stereogram size in cm unit
+# Input stereogram relative_size in cm unit
 size = 5.0
 
-# Input line size in cm unit
+# Input line relative_size in cm unit
 line_length = 0.5  # 30pix is 42 min of arc on 57cm distance
 
 # Input luminance of background
@@ -56,7 +56,10 @@ def disparity_grad(x1_l, x1_r, x2_l, x2_r):
         disparity_gradient = float(relative_d) / float(R_b)
     except ZeroDivisionError:
         disparity_gradient = 0
-    return disparity_gradient
+    print('cyclopian separation: ' + str(R_b))
+    print('relative disparity: ' + str(relative_d))
+    print('disparity gradient: ' + str(disparity_gradient))
+
 
 
 # fixation point
@@ -121,8 +124,8 @@ for i in variation:
     stereogramize(i)
 stereogramize(-6, True)
 
-for d in variation:
-    print(disparity_grad(2 * 3 + d, 2 * 3 - d, -2*3 + 2, -2*3 - 2))
+for d in [0, -2, -4]:
+    print(disparity_grad(4 + d, 4 - d, -4, -4))
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))
