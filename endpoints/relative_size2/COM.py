@@ -189,11 +189,11 @@ def get_results(dt):
 def set_polygon(seq):
     global L, R, n
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/' + str(seq) + '0r.png')
+    R = pyglet.resource.image('stereograms/' + str(seq) + '0r54.png')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/300t.png') # the test bar
+    L = pyglet.resource.image('stereograms/450t54.png') # the test bar
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0

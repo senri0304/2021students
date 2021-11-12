@@ -13,7 +13,7 @@ os.makedirs(to_dir, exist_ok=True)
 size = 5.0
 
 # Input line relative_size in cm unit
-line_length = 0.7  # 30pix is 42 min of arc on 57cm distance
+line_length = 0.4  # 30pix is 42 min of arc on 57cm distance
 
 # Input luminance of background
 lb = 85  # 215, 84%
@@ -35,18 +35,40 @@ ll = round(resolution * line_length / d_height)
 f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
 
 # Input the disparity at pixel units.
-disparity = 4 # 3.0pix, approximately 3*1.5 = 4.5'
-
+disparity = 3 # 3.0pix, approximately 3*1.5 = 4.5'
+distance = 2 # 2 dots correspond half of bar's width
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
+
+
+# calculate disparity gradient
+def disparity_grad(x1_l, x1_r, x2_l, x2_r):
+    # cyclopian position
+    x1 = (x1_l + x1_r) / 2.0
+    x2 = (x2_l + x2_r) / 2.0
+    R_b = x1 - x2
+
+    # disparity
+    d_x1 = float(x1_l - x1_r)
+    d_x2 = float(x2_l - x2_r)
+    relative_d = d_x1 - d_x2
+
+    try:
+        disparity_gradient = float(relative_d) / float(R_b)
+    except ZeroDivisionError:
+        disparity_gradient = 0
+    print('cyclopian separation: ' + str(R_b))
+    print('relative disparity: ' + str(relative_d))
+    print('disparity gradient: ' + str(disparity_gradient))
+
 
 
 # fixation point
 def fixation(d):
-    d.rectangle((int(sz / 2) + eccentricity/2 - f, int(sz / 2) + eccentricity/2 + f * 3,
-                 int(sz / 2) + eccentricity/2 + f, int(sz / 2) + eccentricity/2 - f * 3),
+    d.rectangle((int(sz / 2) + eccentricity - f, int(sz / 2) + eccentricity + f * 3,
+                 int(sz / 2) + eccentricity + f, int(sz / 2) + eccentricity - f * 3),
                 fill=(0, 0, 255), outline=None)
-    d.rectangle((int(sz / 2) + eccentricity/2 - f * 3, int(sz / 2) + eccentricity/2 + f,
-                 int(sz / 2) + eccentricity/2 + f * 3, int(sz / 2) + eccentricity/2 - f),
+    d.rectangle((int(sz / 2) + eccentricity - f * 3, int(sz / 2) + eccentricity + f,
+                 int(sz / 2) + eccentricity + f * 3, int(sz / 2) + eccentricity - f),
                 fill=(0, 0, 255), outline=None)
 
     d.rectangle((int(sz / 2) + eccentricity, int(sz / 2) + eccentricity,
@@ -64,38 +86,42 @@ def fixation(d):
 
 
 # ls
-def stereogramize(ty, ry, d=0, offset=ll/5):
+def stereogramize(d, fork=False):
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
     img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw2 = ImageDraw.Draw(img2)
 
+    #img right eye
     # stereoscopic stimulus
-    draw.rectangle((int(sz / 2) + int(f / 2) - d, int(sz / 2) + int(ry / 2),
-                    int(sz / 2) - int(f / 2) - d, int(sz / 2) + round(offset)),
-                   fill=(0, 0, 0), outline=None)
-    draw.rectangle((int(sz / 2) + int(f / 2) - d, int(sz / 2) - int(ry / 2),
-                    int(sz / 2) - int(f / 2) - d, int(sz / 2) - round(offset)),
-                   fill=(0, 0, 0), outline=None)
-    draw2.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) + int(ty / 2),
-                     int(sz / 2) + int(f / 2) + d, int(sz / 2) - int(ty / 2)),
+    if fork is False:
+        draw.rectangle((int(sz / 2) - int(f / 2) + distance + d, int(sz / 2) - 2,
+                        int(sz / 2) + int(f / 2) + distance + d, int(sz / 2) - int(ll)),
+                       fill=(0, 0, 0), outline=None)
+        draw2.rectangle((int(sz / 2) - int(f / 2) + distance - d, int(sz / 2) - 2,
+                         int(sz / 2) + int(f / 2) + distance - d, int(sz / 2) - int(ll)),
+                        fill=(0, 0, 0), outline=None)
+
+    draw.rectangle((int(sz / 2) + int(f / 2) - distance - disparity, int(sz / 2) + int(ll),
+                    int(sz / 2) - int(f / 2) - distance - disparity, int(sz / 2) + 2),
+                   fill=(int(lb*1.5), 0, 0), outline=None)
+    draw2.rectangle((int(sz / 2) - int(f / 2) - distance + disparity, int(sz / 2) + int(ll),
+                     int(sz / 2) + int(f / 2) - distance + disparity, int(sz / 2) + 2),
                     fill=(int(lb*1.5), 0, 0), outline=None)
 
     fixation(draw)
     fixation(draw2)
 
-    basename = os.path.basename(str(ry) + str(d) + 'r.png')
+    basename = os.path.basename(str(d) + 'r.png')
     img.save(os.path.join(to_dir, basename), quality=100)
-    basename = os.path.basename(str(ty) + str(d) + 't.png')
+    basename = os.path.basename(str(d) + 'l.png')
     img2.save(os.path.join(to_dir, basename), quality=100)
 
 
-stereogramize(round(resolution * 0.8 / d_height), round(resolution * 0.5 / d_height))
-stereogramize(round(resolution * 0.8 / d_height), round(resolution * 0.8 / d_height))
-stereogramize(round(resolution * 0.8 / d_height), round(resolution * 1.3 / d_height))
-
-#for i in variation:
-#    stereogramize(ll, ll, i, ll/10)
+for i in variation:
+    stereogramize(i)
+    print(disparity_grad(distance + i, distance - i, -4 + disparity, -4 - disparity))
+stereogramize(-6, True)
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))

@@ -56,15 +56,13 @@ fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width
 
 # variation
 variation = copy.copy(display_info.variation)
+#variation.append(-6)
 #test_eye = [-1, 1]
 
 # measure only crossed disparity
 # Replicate for repetition
 variation2 = list(np.repeat(variation, rept))
 #test_eye2 = test_eye*int((len(variation2)/2)) #list(np.repeat(test_eye, len(variation2) / 2))
-
-print(variation2)
-
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))
@@ -168,17 +166,17 @@ def get_results(dt):
         m, d = 0, 0
     mdt.append(m)
     dtstd.append(d)
-    print("--------------------------------------------------\n"
-          "trial: " + str(n) + "/" + str(len(variation2)) + "\n"
-          "start: " + str(trial_start) + "\n"
-          "end: " + str(trial_end) + "\n"
-          "key_pressed: " + str(kud) + "\n"
-          "transient counts: " + str(tc) + "\n"
-          "cdt: " + str(c) + "\n"
-          "mdt: " + str(m) + "\n"
-          "dtstd: " + str(d) + "\n"
-          "condition: " + str(sequence[n - 1]) + "\n" # + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
-          "--------------------------------------------------")
+    print("--------------------------------------------------")
+    print("trial: " + str(n) + "/" + str(len(variation2)))
+    print("start: " + str(trial_start))
+    print("end: " + str(trial_end))
+    print("key_pressed: " + str(kud))
+    print("transient counts: " + str(tc))
+    print("cdt: " + str(c))
+    print("mdt: " + str(m))
+    print("dtstd: " + str(d))
+    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
         pyglet.clock.schedule_once(exit_routine, 14.0)
@@ -189,11 +187,11 @@ def get_results(dt):
 def set_polygon(seq):
     global L, R, n
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/' + str(seq) + '0r.png')
+    R = pyglet.resource.image('stereograms/' + str(seq) + 'r.png')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/300t.png') # the test bar
+    L = pyglet.resource.image('stereograms/' + str(seq) + 'l.png') # the test bar
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0

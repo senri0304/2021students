@@ -56,27 +56,25 @@ fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width
 
 # variation
 variation = copy.copy(display_info.variation)
-#test_eye = [-1, 1]
+#variation.append(-6)
+var = [2, 4]
 
 # measure only crossed disparity
 # Replicate for repetition
-variation2 = list(np.repeat(variation, rept))
-#test_eye2 = test_eye*int((len(variation2)/2)) #list(np.repeat(test_eye, len(variation2) / 2))
-
-print(variation2)
-
+variation2 = list(np.repeat(variation, rept*len(var)))
+var2 = var*int((len(variation2)/len(var))) #list(np.repeat(test_eye, len(variation2) / 2))
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))
 random.seed(r)
 sequence = random.sample(variation2, len(variation2))
 random.seed(r)
-#sequence2 = random.sample(continuity2, len(variation2))
+sequence2 = random.sample(var2, len(variation2))
 #random.seed(r)
 #sequence3 = random.sample(test_eye2, len(variation2))
 
 print(sequence)
-#print(sequence2)
+print(sequence2)
 #print(sequence3)
 print(len(sequence))
 
@@ -168,17 +166,17 @@ def get_results(dt):
         m, d = 0, 0
     mdt.append(m)
     dtstd.append(d)
-    print("--------------------------------------------------\n"
-          "trial: " + str(n) + "/" + str(len(variation2)) + "\n"
-          "start: " + str(trial_start) + "\n"
-          "end: " + str(trial_end) + "\n"
-          "key_pressed: " + str(kud) + "\n"
-          "transient counts: " + str(tc) + "\n"
-          "cdt: " + str(c) + "\n"
-          "mdt: " + str(m) + "\n"
-          "dtstd: " + str(d) + "\n"
-          "condition: " + str(sequence[n - 1]) + "\n" # + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
-          "--------------------------------------------------")
+    print("--------------------------------------------------")
+    print("trial: " + str(n) + "/" + str(len(variation2)))
+    print("start: " + str(trial_start))
+    print("end: " + str(trial_end))
+    print("key_pressed: " + str(kud))
+    print("transient counts: " + str(tc))
+    print("cdt: " + str(c))
+    print("mdt: " + str(m))
+    print("dtstd: " + str(d))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
         pyglet.clock.schedule_once(exit_routine, 14.0)
@@ -186,14 +184,14 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq):
+def set_polygon(seq, seq2):
     global L, R, n
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/' + str(seq) + '0r.png')
+    R = pyglet.resource.image('stereograms/' + str(seq) + str(seq2) + 'r.png')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/300t.png') # the test bar
+    L = pyglet.resource.image('stereograms/' + str(seq) + str(seq2) + 'l.png') # the test bar
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0
@@ -202,7 +200,7 @@ def set_polygon(seq):
 def prepare_routine():
     if n < len(variation2):
         fixer()
-        set_polygon(sequence[n])#, sequence2[n], sequence3[n])
+        set_polygon(sequence[n], sequence2[n])#, sequence3[n])
     else:
         pass
 
@@ -212,7 +210,7 @@ start = time.time()
 win.push_handlers(resp_handler)
 
 fixer()
-set_polygon(sequence[0])#, sequence2[0], sequence3[0])
+set_polygon(sequence[0], sequence2[0])#, sequence3[0])
 
 for i in sequence:
     tc = 0  # Count transients

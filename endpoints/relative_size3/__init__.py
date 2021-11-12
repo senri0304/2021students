@@ -37,26 +37,20 @@ f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually
 # Input the disparity at pixel units.
 disparity = 4 # 3.0pix, approximately 3*1.5 = 4.5'
 
-eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
+ec = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
 
 # fixation point
-def fixation(d):
-    d.rectangle((int(sz / 2) + eccentricity/2 - f, int(sz / 2) + eccentricity/2 + f * 3,
-                 int(sz / 2) + eccentricity/2 + f, int(sz / 2) + eccentricity/2 - f * 3),
+def fixation(d, eccentricity=ec):
+    d.rectangle((int(sz / 2) + eccentricity - f, int(sz / 2) + f * 3,
+                 int(sz / 2) + eccentricity + f, int(sz / 2) - f * 3),
                 fill=(0, 0, 255), outline=None)
-    d.rectangle((int(sz / 2) + eccentricity/2 - f * 3, int(sz / 2) + eccentricity/2 + f,
-                 int(sz / 2) + eccentricity/2 + f * 3, int(sz / 2) + eccentricity/2 - f),
+    d.rectangle((int(sz / 2) + eccentricity - f * 3, int(sz / 2) + f,
+                 int(sz / 2) + eccentricity + f * 3, int(sz / 2) - f),
                 fill=(0, 0, 255), outline=None)
 
-    d.rectangle((int(sz / 2) + eccentricity, int(sz / 2) + eccentricity,
-                 int(sz / 2) - eccentricity, int(sz / 2) + eccentricity),
-                fill=(0, 0, 255), outline=None)
     d.rectangle((int(sz / 2) - eccentricity, int(sz / 2) + eccentricity,
                  int(sz / 2) - eccentricity, int(sz / 2) - eccentricity),
-                fill=(0, 0, 255), outline=None)
-    d.rectangle((int(sz / 2) - eccentricity, int(sz / 2) - eccentricity,
-                 int(sz / 2) + eccentricity, int(sz / 2) - eccentricity),
                 fill=(0, 0, 255), outline=None)
     d.rectangle((int(sz / 2) + eccentricity, int(sz / 2) - eccentricity,
                  int(sz / 2) + eccentricity, int(sz / 2) + eccentricity),
@@ -64,7 +58,7 @@ def fixation(d):
 
 
 # ls
-def stereogramize(ty, ry, d=0, offset=ll/5):
+def stereogramize(ecc, ty, ry, d=0, offset=round(resolution * 0.4 / d_height)/2):
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
     img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
@@ -79,23 +73,23 @@ def stereogramize(ty, ry, d=0, offset=ll/5):
                    fill=(0, 0, 0), outline=None)
     draw2.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) + int(ty / 2),
                      int(sz / 2) + int(f / 2) + d, int(sz / 2) - int(ty / 2)),
-                    fill=(int(lb*1.5), 0, 0), outline=None)
+                    fill=(int(lb*1.5), int(lb/2), int(lb/2)), outline=None)
 
-    fixation(draw)
-    fixation(draw2)
+    fixation(draw, ecc)
+    fixation(draw2, ecc)
 
-    basename = os.path.basename(str(ry) + str(d) + 'r.png')
+    basename = os.path.basename(str(ry) + str(offset) + 'r' + str(ecc) + '.png')
     img.save(os.path.join(to_dir, basename), quality=100)
-    basename = os.path.basename(str(ty) + str(d) + 't.png')
+    basename = os.path.basename(str(ty) + str(offset) + 't' + str(ecc) + '.png')
     img2.save(os.path.join(to_dir, basename), quality=100)
 
 
-stereogramize(round(resolution * 0.8 / d_height), round(resolution * 0.5 / d_height))
-stereogramize(round(resolution * 0.8 / d_height), round(resolution * 0.8 / d_height))
-stereogramize(round(resolution * 0.8 / d_height), round(resolution * 1.3 / d_height))
+for i in variation:
+    stereogramize(ec, i, i, d=0, offset=round(resolution * 0.3 / d_height)/2)
+    stereogramize(ec*2, i, i, d=0, offset=round(resolution * 0.3 / d_height)/2)
+    stereogramize(ec, i, i, d=0, offset=round(resolution * 0.9 / d_height)/2)
+    stereogramize(ec*2, i, i, d=0, offset=round(resolution * 0.9 / d_height)/2)
 
-#for i in variation:
-#    stereogramize(ll, ll, i, ll/10)
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))

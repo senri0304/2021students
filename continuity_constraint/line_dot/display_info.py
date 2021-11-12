@@ -20,7 +20,4 @@ d_height = 2.54 * (aspect_height / c) * inch
 
 deg1 = round(resolution * (1 / d_height))
 
-v = [0.5, 0.8, 1.3]
-variation = []
-for i in v:
-    variation.append(round(resolution * i / d_height))
+variation = [4]
