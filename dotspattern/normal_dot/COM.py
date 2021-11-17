@@ -19,9 +19,6 @@ key = pyglet.window.key
 win = win
 
 # Load variable conditions
-deg1 = deg1
-cntx = cntx
-cnty = cnty
 dat = pd.DataFrame()
 iso = 8.0
 draw_objects = []  # 描画対象リスト
@@ -151,11 +148,11 @@ def get_results(dt):
 def set_polygon(seq):
     global L, R, n
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/' + str(seq) + '0r.png')
+    R = pyglet.resource.image('stereograms/ls' + str(seq) + 'r.png')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/' + str(seq) + '0l.png') # the test bar
+    L = pyglet.resource.image('stereograms/ls' + str(seq) + 'l.png') # the test bar
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0

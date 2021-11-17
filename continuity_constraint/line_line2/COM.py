@@ -1,27 +1,39 @@
 # -*- coding: utf-8 -*-
+import copy
 import datetime
+import math
 import os
 import pyglet
+import random
 import time
 from collections import deque
+
+import numpy as np
 import pandas as pd
+from pyglet.gl import *
 from pyglet.image import AbstractImage
 
-from display_info import *
+import display_info
 
 # Prefernce
 # ------------------------------------------------------------------------
 rept = 1
 cal = -58 # You can calibrate the convergence angle for better viewing.
+exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
+# Get display informations
+display = pyglet.canvas.get_display()
+screens = display.get_screens()
+win = pyglet.window.Window(style=pyglet.window.Window.WINDOW_STYLE_BORDERLESS)
+win.set_fullscreen(fullscreen=True, screen=screens[len(screens) - 1])  # Present secondary display
+win.set_exclusive_mouse(exclude_mousePointer)  # Exclude mouse pointer
 key = pyglet.window.key
-win = win
 
 # Load variable conditions
-deg1 = deg1
-cntx = cntx
-cnty = cnty
+deg1 = display_info.deg1
+cntx = screens[len(screens) - 1].width / 2  # Store center of screen about x position
+cnty = screens[len(screens) - 1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
 iso = 8.0
 draw_objects = []  # 描画対象リスト
@@ -41,6 +53,30 @@ beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
 pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
 fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 + cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
+
+# variation
+variation = copy.copy(display_info.variation)
+#variation.append(-6)
+var = copy.copy(display_info.length)
+
+# measure only crossed disparity
+# Replicate for repetition
+variation2 = list(np.repeat(variation, rept*len(var)))
+var2 = var*int((len(variation2)/len(var))) #list(np.repeat(test_eye, len(variation2) / 2))
+
+# Randomize
+r = random.randint(0, math.factorial(len(variation2)))
+random.seed(r)
+sequence = random.sample(variation2, len(variation2))
+random.seed(r)
+sequence2 = random.sample(var2, len(variation2))
+#random.seed(r)
+#sequence3 = random.sample(test_eye2, len(variation2))
+
+print(sequence)
+print(sequence2)
+#print(sequence3)
+print(len(sequence))
 
 
 # ----------- Core program following ----------------------------
@@ -139,7 +175,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
@@ -148,14 +184,14 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq):
+def set_polygon(seq, seq2):
     global L, R, n
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/' + str(seq) + '0r.png')
+    R = pyglet.resource.image('stereograms/' + str(seq) + str(seq2) + 'r.png')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/' + str(seq) + '0l.png') # the test bar
+    L = pyglet.resource.image('stereograms/' + str(seq) + str(seq2) + 'l.png') # the test bar
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0
@@ -164,7 +200,7 @@ def set_polygon(seq):
 def prepare_routine():
     if n < len(variation2):
         fixer()
-        set_polygon(sequence[n])#, sequence3[n])
+        set_polygon(sequence[n], sequence2[n])#, sequence3[n])
     else:
         pass
 
@@ -174,7 +210,7 @@ start = time.time()
 win.push_handlers(resp_handler)
 
 fixer()
-set_polygon(sequence[0])#, sequence3[0])
+set_polygon(sequence[0], sequence2[0])#, sequence3[0])
 
 for i in sequence:
     tc = 0  # Count transients
