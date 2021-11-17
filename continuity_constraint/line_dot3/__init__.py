@@ -86,51 +86,54 @@ def fixation(d):
 
 
 # ls
-def stereogramize(d=0, v=0):
+def stereogramize(d=0, v=0, h=True):
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
     img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw2 = ImageDraw.Draw(img2)
 
-    #img right eye
+    t = -3
+    if h:
+        t2 = 1
+    else:
+        t2 = -1
     # stereoscopic stimulus
+    # dots
+    draw.line((int(sz / 2) - int(f / 2) + d - t, int(sz / 2) + int(ll / 2) + v + t,
+               int(sz / 2) + int(f / 2) + d + t, int(sz / 2) + int(ll / 2) + v - t),
+              fill=(0, 0, 0), width=2)
+    draw.line((int(sz / 2) - int(f / 2) + d - t, int(sz / 2) - v - int(ll / 2) + t,
+               int(sz / 2) + int(f / 2) + d + t, int(sz / 2) - v - int(ll / 2) - t),
+              fill=(0, 0, 0), width=2)
 
-    draw.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) + int(ll / 2) + v,
-                    int(sz / 2) + int(f / 2) + d, int(sz / 2) + int(ll / 2) + v - int(f)),
-                   fill=(0, 0, 0), outline=None)
-    draw.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) - int(ll / 2) - v,
-                    int(sz / 2) + int(f / 2) + d, int(sz / 2) - int(ll / 2) - v + int(f)),
-                   fill=(0, 0, 0), outline=None)
+    draw2.line((int(sz / 2) - int(f / 2) - d - t, int(sz / 2) + int(ll / 2) + v + t*t2,
+                int(sz / 2) + int(f / 2) - d + t, int(sz / 2) + int(ll / 2) + v - t*t2),
+               fill=(0, 0, 0), width=2)
+    draw2.line((int(sz / 2) - int(f / 2) - d - t, int(sz / 2) - v - int(ll / 2) + t*t2,
+                int(sz / 2) + int(f / 2) - d + t, int(sz / 2) - v - int(ll / 2) - t*t2),
+               fill=(0, 0, 0), width=2)
 
-    draw2.rectangle((int(sz / 2) - int(f / 2) - d, int(sz / 2) + int(ll / 2) + v,
-                     int(sz / 2) + int(f / 2) - d, int(sz / 2) + int(ll / 2) + v - int(f)),
-                    fill=(0, 0, 0), outline=None)
-    draw2.rectangle((int(sz / 2) - int(f / 2) - d, int(sz / 2) - int(ll / 2) - v,
-                     int(sz / 2) + int(f / 2) - d, int(sz / 2) - int(ll / 2) - v + int(f)),
-                    fill=(0, 0, 0), outline=None)
-
-    draw.rectangle((int(sz / 2) + int(f / 2) - disparity, int(sz / 2) + int(ll / 2),
-                    int(sz / 2) - int(f / 2) - disparity, int(sz / 2) - int(ll / 2)),
+    # line
+    draw.rectangle((int(sz / 2) + int(f / 2) - d, int(sz / 2) + int(ll / 2),
+                    int(sz / 2) - int(f / 2) - d, int(sz / 2) - int(ll / 2)),
                    fill=(0, 0, 0), outline=None)
-    draw2.rectangle((int(sz / 2) - int(f / 2) + disparity, int(sz / 2) + int(ll / 2),
-                     int(sz / 2) + int(f / 2) + disparity, int(sz / 2) - int(ll / 2)),
+    draw2.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) + int(ll / 2),
+                     int(sz / 2) + int(f / 2) + d, int(sz / 2) - int(ll / 2)),
                     fill=(0, 0, 0), outline=None)
 
     fixation(draw)
     fixation(draw2)
 
-    basename = os.path.basename(str(d) + str(v) + 'r.png')
+    basename = os.path.basename(str(d) + str(h) + 'r.png')
     img.save(os.path.join(to_dir, basename), quality=100)
-    basename = os.path.basename(str(d) + str(v) + 'l.png')
+    basename = os.path.basename(str(d) + str(h) + 'l.png')
     img2.save(os.path.join(to_dir, basename), quality=100)
 
 
 for i in variation:
-    stereogramize(i, 8)
-    stereogramize(i, 6)
     stereogramize(i, 4)
-    stereogramize(i, 2)
-    stereogramize(i, 0)
+    stereogramize(i, 4, False)
+    disparity_grad(int(sz / 2) - int(f / 2) + i, int(sz / 2) + int(f / 2) - i, int(sz / 2) + int(f / 2) - i, int(sz / 2) - int(f / 2) + i)
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))

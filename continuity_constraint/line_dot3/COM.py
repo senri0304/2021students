@@ -57,7 +57,7 @@ fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width
 # variation
 variation = copy.copy(display_info.variation)
 #variation.append(-6)
-var = [0, 4]#, 2, 4, 6, 8]
+var = ['True', 'False']
 
 # measure only crossed disparity
 # Replicate for repetition

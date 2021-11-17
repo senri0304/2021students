@@ -92,29 +92,35 @@ def stereogramize(d=0, v=0):
     img2 = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw2 = ImageDraw.Draw(img2)
 
-    #img right eye
-    # stereoscopic stimulus
+    if d > 0:
+        vr = int(lb*1.5)
+        hr = 0
+        draw.rectangle((int(sz / 2) + int(f / 2) + disparity, int(sz / 2) + int(ll / 2),
+                        int(sz / 2) - int(f / 2) + disparity, int(sz / 2) - int(ll / 2)),
+                       fill=(0, 0, 0), outline=None)
+        draw2.rectangle((int(sz / 2) - int(f / 2) - disparity, int(sz / 2) + int(ll / 2),
+                         int(sz / 2) + int(f / 2) - disparity, int(sz / 2) - int(ll / 2)),
+                        fill=(0, 0, 0), outline=None)
+        draw.rectangle((int(sz / 2) + int(ll / 2) - disparity, int(sz / 2) + int(f / 2),
+                        int(sz / 2) - int(ll / 2) - disparity, int(sz / 2) - int(f / 2)),
+                       fill=(int(lb*1.5), 0, 0), outline=None)
+        draw2.rectangle((int(sz / 2) - int(ll / 2) + disparity, int(sz / 2) + int(f / 2),
+                         int(sz / 2) + int(ll / 2) + disparity, int(sz / 2) - int(f / 2)),
+                        fill=(int(lb*1.5), 0, 0), outline=None)
+    else:
+        draw.rectangle((int(sz / 2) + int(ll / 2) + disparity, int(sz / 2) + int(f / 2),
+                        int(sz / 2) - int(ll / 2) + disparity, int(sz / 2) - int(f / 2)),
+                       fill=(0, 0, 0), outline=None)
+        draw2.rectangle((int(sz / 2) - int(ll / 2) - disparity, int(sz / 2) + int(f / 2),
+                         int(sz / 2) + int(ll / 2) - disparity, int(sz / 2) - int(f / 2)),
+                        fill=(0, 0, 0), outline=None)
+        draw.rectangle((int(sz / 2) + int(f / 2) - disparity, int(sz / 2) + int(ll / 2),
+                        int(sz / 2) - int(f / 2) - disparity, int(sz / 2) - int(ll / 2)),
+                       fill=(int(lb*1.5), 0, 0), outline=None)
+        draw2.rectangle((int(sz / 2) - int(f / 2) + disparity, int(sz / 2) + int(ll / 2),
+                         int(sz / 2) + int(f / 2) + disparity, int(sz / 2) - int(ll / 2)),
+                        fill=(int(lb*1.5), 0, 0), outline=None)
 
-    draw.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) + int(ll / 2) + v,
-                    int(sz / 2) + int(f / 2) + d, int(sz / 2) + int(ll / 2) + v - int(f)),
-                   fill=(0, 0, 0), outline=None)
-    draw.rectangle((int(sz / 2) - int(f / 2) + d, int(sz / 2) - int(ll / 2) - v,
-                    int(sz / 2) + int(f / 2) + d, int(sz / 2) - int(ll / 2) - v + int(f)),
-                   fill=(0, 0, 0), outline=None)
-
-    draw2.rectangle((int(sz / 2) - int(f / 2) - d, int(sz / 2) + int(ll / 2) + v,
-                     int(sz / 2) + int(f / 2) - d, int(sz / 2) + int(ll / 2) + v - int(f)),
-                    fill=(0, 0, 0), outline=None)
-    draw2.rectangle((int(sz / 2) - int(f / 2) - d, int(sz / 2) - int(ll / 2) - v,
-                     int(sz / 2) + int(f / 2) - d, int(sz / 2) - int(ll / 2) - v + int(f)),
-                    fill=(0, 0, 0), outline=None)
-
-    draw.rectangle((int(sz / 2) + int(f / 2) - disparity, int(sz / 2) + int(ll / 2),
-                    int(sz / 2) - int(f / 2) - disparity, int(sz / 2) - int(ll / 2)),
-                   fill=(0, 0, 0), outline=None)
-    draw2.rectangle((int(sz / 2) - int(f / 2) + disparity, int(sz / 2) + int(ll / 2),
-                     int(sz / 2) + int(f / 2) + disparity, int(sz / 2) - int(ll / 2)),
-                    fill=(0, 0, 0), outline=None)
 
     fixation(draw)
     fixation(draw2)
@@ -126,11 +132,7 @@ def stereogramize(d=0, v=0):
 
 
 for i in variation:
-    stereogramize(i, 8)
-    stereogramize(i, 6)
-    stereogramize(i, 4)
-    stereogramize(i, 2)
-    stereogramize(i, 0)
+    stereogramize(i)
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))
