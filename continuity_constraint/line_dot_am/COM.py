@@ -1,39 +1,24 @@
 # -*- coding: utf-8 -*-
-import copy
 import datetime
-import math
 import os
 import pyglet
-import random
 import time
 from collections import deque
-
-import numpy as np
 import pandas as pd
-from pyglet.gl import *
 from pyglet.image import AbstractImage
 
-import display_info
+from display_info import *
 
 # Prefernce
 # ------------------------------------------------------------------------
-rept = 5
+rept = 1
 cal = -58 # You can calibrate the convergence angle for better viewing.
-exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
-# Get display informations
-display = pyglet.canvas.get_display()
-screens = display.get_screens()
-win = pyglet.window.Window(style=pyglet.window.Window.WINDOW_STYLE_BORDERLESS)
-win.set_fullscreen(fullscreen=True, screen=screens[len(screens) - 1])  # Present secondary display
-win.set_exclusive_mouse(exclude_mousePointer)  # Exclude mouse pointer
 key = pyglet.window.key
+win = win
 
 # Load variable conditions
-deg1 = display_info.deg1
-cntx = screens[len(screens) - 1].width / 2  # Store center of screen about x position
-cnty = screens[len(screens) - 1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
 iso = 8.0
 draw_objects = []  # 描画対象リスト
@@ -53,32 +38,23 @@ beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
 pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
 fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 + cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
-
-# variation
-variation = copy.copy(display_info.variation)
-#variation.append(-6)
-# 端点位置
-var = [0, 4]
-
-# measure only crossed disparity
-# Replicate for repetition
-variation2 = list(np.repeat(variation, rept*len(var)))
-var2 = var*int((len(variation2)/len(var))) #list(np.repeat(test_eye, len(variation2) / 2))
-
-# Randomize
-r = random.randint(0, math.factorial(len(variation2)))
-random.seed(r)
-sequence = random.sample(variation2, len(variation2))
-random.seed(r)
-sequence2 = random.sample(var2, len(variation2))
-#random.seed(r)
-#sequence3 = random.sample(test_eye2, len(variation2))
-
-print(sequence)
-print(sequence2)
-#print(sequence3)
-print(len(sequence))
-
+# Set up polygon for stimulus
+R = pyglet.resource.image('stereograms/44r.png')
+R = pyglet.sprite.Sprite(R)
+R.x = cntx + deg1 * iso + cal - R.width / 2.0
+R.y = cnty - R.height / 2.0
+L = pyglet.resource.image('stereograms/44l.png')  # the test bar
+L = pyglet.sprite.Sprite(L)
+L.x = cntx - deg1 * iso - cal - L.width / 2.0
+L.y = cnty - L.height / 2.0
+R2 = pyglet.resource.image('stereograms/ls-1.png')
+R2 = pyglet.sprite.Sprite(R2)
+R2.x = cntx + deg1 * iso + cal - R.width / 2.0
+R2.y = cnty - R.height / 2.0
+L2 = pyglet.resource.image('stereograms/ls1.png')  # the test bar
+L2 = pyglet.sprite.Sprite(L2)
+L2.x = cntx - deg1 * iso - cal - L.width / 2.0
+L2.y = cnty - L.height / 2.0
 
 # ----------- Core program following ----------------------------
 
@@ -92,8 +68,9 @@ class key_resp(object):
         if exit is True and symbol == key.UP:
             p_sound.play()
             exit = False
+            pyglet.clock.schedule_interval(on_move, 0.25)
             pyglet.clock.schedule_once(delete, 30.0)
-            replace()
+            replace(sequence[n])
             trial_start = time.time()
         if symbol == key.ESCAPE:
             win.close()
@@ -115,11 +92,18 @@ def fixer():
     draw_objects.append(fixr)
 
 
-def replace():
+def replace(seq):
     del draw_objects[:]
-    fixer()
-    draw_objects.append(R)
-    draw_objects.append(L)
+    if seq == 'S':
+        draw_objects.append(R)
+        draw_objects.append(L)
+        draw_objects.append(R2)
+        draw_objects.append(L2)
+    else:
+        draw_objects.append(R)
+        draw_objects.append(L2)
+        draw_objects.append(R2)
+        draw_objects.append(L)
 
 
 # A end routine function
@@ -141,9 +125,17 @@ def on_draw():
         draw_object.draw()
 
 
+@win.event
+def on_move(dt):
+    draw_objects.reverse()
+    draw_objects[0].draw()
+    draw_objects[1].draw()
+
+
 # Remove stimulus
 def delete(dt):
     global n, trial_end
+    pyglet.clock.unschedule(on_move)
     del draw_objects[:]
     p_sound.play()
     n += 1
@@ -176,7 +168,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
@@ -185,23 +177,9 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq, seq2):
-    global L, R, n
-    # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/' + str(seq) + str(seq2) + 'r.png')
-    R = pyglet.sprite.Sprite(R)
-    R.x = cntx + deg1 * iso + cal - R.width / 2.0
-    R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/' + str(seq) + str(seq2) + 'l.png') # the test bar
-    L = pyglet.sprite.Sprite(L)
-    L.x = cntx - deg1 * iso - cal - L.width / 2.0
-    L.y = cnty - L.height / 2.0
-
-
 def prepare_routine():
     if n < len(variation2):
         fixer()
-        set_polygon(sequence[n], sequence2[n])#, sequence3[n])
     else:
         pass
 
@@ -211,7 +189,6 @@ start = time.time()
 win.push_handlers(resp_handler)
 
 fixer()
-set_polygon(sequence[0], sequence2[0])#, sequence3[0])
 
 for i in sequence:
     tc = 0  # Count transients
@@ -231,8 +208,6 @@ daten = datetime.datetime.now()
 
 # Write results onto csv
 results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
-#                        'continuity': sequence2,
-#                        'test_eye': sequence3,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

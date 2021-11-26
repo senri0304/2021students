@@ -20,4 +20,5 @@ d_height = 2.54 * (aspect_height / c) * inch
 
 deg1 = round(resolution * (1 / d_height))
 
-variation = [6]
+#
+variation = [0, 4, 8]

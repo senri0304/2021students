@@ -9,8 +9,6 @@ inch = 23.0
 aspect_width = 16.0
 aspect_height = 9.0
 
-
-
 exclude_mousePointer = False
 
 # Get display information
@@ -33,13 +31,16 @@ d_height = 2.54 * (aspect_height / c) * inch
 deg1 = round(resolution * (1 / d_height))
 
 # independent variables
-variation = [-4, 4]
+# The __init__.py refers this var.
+variation = ['S', 'R']
+
+var3 = variation
 
 # repetition
 rept = 1
 
 # Replicate for repetition
-variation2 = list(np.repeat(variation, rept))
+variation2 = list(np.repeat(var3, rept))
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))

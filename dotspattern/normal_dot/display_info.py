@@ -31,6 +31,7 @@ d_height = 2.54 * (aspect_height / c) * inch
 deg1 = round(resolution * (1 / d_height))
 
 # independent variables
+# The __init__.py refers this var.
 variation = [[1], [3], [5], [1, 3], [1, 3, 5]]
 
 var = []
@@ -42,23 +43,17 @@ for i in variation:
 
 var3 = [str(var[i]) + str(var2[i]) for i in range(len(var))]
 
-
 # repetition
 rept = 1
 
 # Replicate for repetition
+# The COM.py refers this var.
 variation2 = list(np.repeat(var3, rept))
-#length2 = list(np.repeat(var2, rept))
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))
 random.seed(r)
 sequence = random.sample(variation2, len(variation2))
-#random.seed(r)
-#sequence2 = random.sample(length2, len(variation2))
-
-
 
 print(sequence)
-#print(sequence2)
 print(len(sequence))
