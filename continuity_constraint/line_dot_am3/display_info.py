@@ -33,19 +33,22 @@ deg1 = round(resolution * (1 / d_height))
 # independent variables
 # The __init__.py refers this var.
 variation = ['S', 'R']
-
-var3 = variation
+var2 = [4, 8, 12]
 
 # repetition
 rept = 1
 
 # Replicate for repetition
-variation2 = list(np.repeat(var3, rept))
+variation2 = list(np.repeat(var2, rept*len(variation)))
+variation4 = variation*int((len(variation2))/2)
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))
 random.seed(r)
 sequence = random.sample(variation2, len(variation2))
+random.seed(r)
+sequence2 = random.sample(variation4, len(variation2))
 
 print(sequence)
+print(sequence2)
 print(len(sequence))

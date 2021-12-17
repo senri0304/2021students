@@ -44,7 +44,7 @@ for i in variation:
 var3 = [str(var[i]) + str(var2[i]) for i in range(len(var))]
 
 # repetition
-rept = 5
+rept = 1
 
 cal = -58 # You can calibrate the convergence angle for better viewing.
 

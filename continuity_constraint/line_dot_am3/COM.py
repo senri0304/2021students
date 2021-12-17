@@ -38,7 +38,15 @@ beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
 pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
 fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 + cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
-
+# Set up polygon for stimulus
+R2 = pyglet.resource.image('stereograms/ls-1.png')
+R2 = pyglet.sprite.Sprite(R2)
+R2.x = cntx + deg1 * iso + cal - R2.width / 2.0
+R2.y = cnty - R2.height / 2.0
+L2 = pyglet.resource.image('stereograms/ls1.png')  # the test bar
+L2 = pyglet.sprite.Sprite(L2)
+L2.x = cntx - deg1 * iso - cal - L2.width / 2.0
+L2.y = cnty - L2.height / 2.0
 
 # ----------- Core program following ----------------------------
 
@@ -52,8 +60,9 @@ class key_resp(object):
         if exit is True and symbol == key.UP:
             p_sound.play()
             exit = False
+            pyglet.clock.schedule_interval(on_move, 0.25)
             pyglet.clock.schedule_once(delete, 30.0)
-            replace()
+            replace(sequence2[n])
             trial_start = time.time()
         if symbol == key.ESCAPE:
             win.close()
@@ -75,11 +84,18 @@ def fixer():
     draw_objects.append(fixr)
 
 
-def replace():
+def replace(seq):
     del draw_objects[:]
-    fixer()
-    draw_objects.append(R)
-    draw_objects.append(L)
+    if seq == 'S':
+        draw_objects.append(R)
+        draw_objects.append(L)
+        draw_objects.append(R2)
+        draw_objects.append(L2)
+    else:
+        draw_objects.append(R)
+        draw_objects.append(L2)
+        draw_objects.append(R2)
+        draw_objects.append(L)
 
 
 # A end routine function
@@ -101,9 +117,17 @@ def on_draw():
         draw_object.draw()
 
 
+@win.event
+def on_move(dt):
+    draw_objects.reverse()
+    draw_objects[0].draw()
+    draw_objects[1].draw()
+
+
 # Remove stimulus
 def delete(dt):
     global n, trial_end
+    pyglet.clock.unschedule(on_move)
     del draw_objects[:]
     p_sound.play()
     n += 1
@@ -136,7 +160,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
@@ -145,14 +169,14 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq):
+def set_polygon(seq2):
     global L, R, n
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/rds' + str(seq) + '0.png')
+    R = pyglet.resource.image('stereograms/4' + str(seq2) + 'r.png')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/rds' + str(-seq) + '0.png') # the test bar
+    L = pyglet.resource.image('stereograms/4' + str(seq2) + 'l.png') # the test bar
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0
@@ -161,7 +185,7 @@ def set_polygon(seq):
 def prepare_routine():
     if n < len(variation2):
         fixer()
-        set_polygon(sequence[n])#, sequence3[n])
+        set_polygon(sequence[n])
     else:
         pass
 
@@ -172,6 +196,7 @@ win.push_handlers(resp_handler)
 
 fixer()
 set_polygon(sequence[0])#, sequence3[0])
+
 
 for i in sequence:
     tc = 0  # Count transients
@@ -191,8 +216,7 @@ daten = datetime.datetime.now()
 
 # Write results onto csv
 results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
-#                        'continuity': sequence2,
-#                        'test_eye': sequence3,
+                        'SR': sequence2,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

@@ -136,7 +136,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]))# + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
@@ -145,14 +145,15 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq):
+def set_polygon(seq, seq2):
     global L, R, n
+#    ani = pyglet.image.Animation.from_image_sequence(imgs, duration=0.1, loop=True)
     # Set up polygon for stimulus
-    R = pyglet.resource.image('stereograms/rds' + str(seq) + '0.png')
+    R = pyglet.resource.animation('stereograms/krds' + str(seq) + str(seq2) + '.gif')
     R = pyglet.sprite.Sprite(R)
     R.x = cntx + deg1 * iso + cal - R.width / 2.0
     R.y = cnty - R.height / 2.0
-    L = pyglet.resource.image('stereograms/rds' + str(-seq) + '0.png') # the test bar
+    L = pyglet.resource.animation('stereograms/krds0' + str(seq2) + '.gif') # the test bar
     L = pyglet.sprite.Sprite(L)
     L.x = cntx - deg1 * iso - cal - L.width / 2.0
     L.y = cnty - L.height / 2.0
@@ -161,7 +162,7 @@ def set_polygon(seq):
 def prepare_routine():
     if n < len(variation2):
         fixer()
-        set_polygon(sequence[n])#, sequence3[n])
+        set_polygon(sequence[n], sequence2[n])#, sequence3[n])
     else:
         pass
 
@@ -171,7 +172,7 @@ start = time.time()
 win.push_handlers(resp_handler)
 
 fixer()
-set_polygon(sequence[0])#, sequence3[0])
+set_polygon(sequence[0], sequence2[0])#, sequence3[0])
 
 for i in sequence:
     tc = 0  # Count transients
@@ -191,8 +192,7 @@ daten = datetime.datetime.now()
 
 # Write results onto csv
 results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
-#                        'continuity': sequence2,
-#                        'test_eye': sequence3,
+                        'cnd2': sequence2,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

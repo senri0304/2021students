@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os, wave, struct, copy
-import numpy as np
+import os, wave, struct
 from PIL import Image, ImageDraw
-from display_info import *
+from continuity_constraint.parity_mono_kineticrds.noise.display_info import *
 
 
 to_dir = 'materials'
-os.makedirs(to_dir, exist_ok=True)
-to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
 # Input stereogram relative_size in cm unit
@@ -30,8 +27,6 @@ ll = round(resolution * line_length / d_height)
 f = 2 #round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
 
 # Input the disparity at pixel units.
-disparity = 4 # 3.0pix, approximately 3*1.5 = 4.5'
-
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
 
@@ -44,13 +39,13 @@ def fixation(d):
                 fill=(0, 0, 255), outline=None)
 
 # generate random pattern
-def pattern(n, p, shape=(sz, sz)):
+def pattern(n, p, size):
+    shape = (size, size)
     rands = np.random.binomial(2, p, shape)
 
-    img = Image.new("RGB", (int(shape[0]), int(shape[1])), (lb, lb, lb))
+    img = Image.new("RGBA", (int(shape[0]), int(shape[1])), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
 
-    y = 0
     for x in range(0, shape[0]):
         for y in range(0, shape[0]):
             if rands[x, y] != 0:
@@ -59,47 +54,87 @@ def pattern(n, p, shape=(sz, sz)):
     img.save(os.path.join('materials/rds' + str(n) + '.png'), quality=100)
 
 
-pattern('outer0', 0.20)
-pattern('inner0', 0.05, (int(sz/4), int(sz/4)))
+# stereogram without stimuli
+img = Image.new("RGBA", (sz*2, sz*2), (lb, lb, lb, 255))
+draw = ImageDraw.Draw(img)
+
+basename = os.path.basename('gbg.png')
+img.save(os.path.join(to_dir, basename), quality=100)
 
 
-# rds, requires disparity in pix, background image path and target image path
-def stereogramize(disparity, outer, inner):
+# rds, requires line size in proportion, background image path and target image path
+def stereogramize(disparity, size, outer='materials/rdsnoise.png'):
     # Two images prepare
     bg = Image.open(outer)
-    tar = Image.open(inner)
-
-    bg.paste(tar, (int(bg.width/2 - tar.width/2 + disparity/2), int(bg.height/2 - tar.height/2)))
+    gbg = Image.open('materials/gbg.png')
 
     img_resize = bg.resize((int(bg.width*2), int(bg.height*2)))
-
-    draw = ImageDraw.Draw(img_resize)
-    draw.rectangle((img_resize.width / 2 - int(f / 2) - disparity, img_resize.height / 2 - ll / 2,
-                    img_resize.width / 2 + int(f / 2) - disparity, img_resize.height / 2 + ll / 2),
-                   fill=(int(lb*1.5), 0, 0), outline=None)
-
+    img = Image.new('RGBA', (sz*2, sz*2), (lb, lb, lb, 0))
+    img.paste(img_resize, (int(gbg.width/2 - img_resize.width/2) + disparity, int(gbg.height/2 - img_resize.height/2)))
+    gbg = Image.alpha_composite(gbg, img)
+    draw = ImageDraw.Draw(gbg)
+    if size == 0:
+        draw.rectangle((int(gbg.width / 2) - int(f / 2), int(gbg.height / 2) - int(ll / 2),
+                        int(gbg.width / 2) + int(f / 2), int(gbg.height / 2) + int(ll / 2)),
+                       fill=(int(lb*1.5), 0, 0), outline=None)
+    else:
+        draw.rectangle((int(gbg.width / 2) - int((ll / 2)*size), int(gbg.height / 2) - int(f / 2),
+                        int(gbg.width / 2) + int((ll / 2)*size), int(gbg.height / 2) + int(f / 2)),
+                       fill=(0, 0, 0), outline=None)
     fixation(draw)
-
-    # Write images
-    basename = os.path.basename('rds' + str(disparity) + '0.png')
-    img_resize.save(os.path.join(to_dir, basename), quality=100)
-
-
-stereogramize(4, 'materials/rdsouter0.png', 'materials/rdsinner0.png')
-stereogramize(-4, 'materials/rdsouter0.png', 'materials/rdsinner0.png')
-#stereogramize(0, 'materials/rdsouter0.1.png', 'materials/rdsinner0.1.png')
-#stereogramize(-0, 'materials/rdsouter0.1.png', 'materials/rdsinner0.1.png')
+    return gbg
 
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz*2, sz*2), (lb, lb, lb))
 draw = ImageDraw.Draw(img)
 
-to_dir = 'materials'
-os.makedirs(to_dir, exist_ok=True)
+fixation(draw)
+
 basename = os.path.basename('pedestal.png')
 img.save(os.path.join(to_dir, basename), quality=100)
 
+
+to_dir = 'stereograms'
+os.makedirs(to_dir, exist_ok=True)
+
+
+def to_gif(disparity, line_length, n):
+    imgs = []
+    for i in range(1, 11):
+        pattern('noise', 0.3, int(sz/2))
+        imgs.append(stereogramize(disparity, line_length))
+    imgs[0].save('stereograms/krds' + str(line_length) + str(n) + '.gif',
+                 save_all=True, append_images=imgs[1:], optimize=False, duration=50, loop=1)
+
+
+for i in range(1, 6):
+    to_gif(0, 0.5, i)
+    to_gif(0, 1.0, i)
+    to_gif(0, 2.0, i)
+    to_gif(0, 4.0, i)
+
+
+# no rds rival lines
+def ls(size=0):
+    img = Image.new("RGB", (sz*2, sz*2), (lb, lb, lb))
+    draw = ImageDraw.Draw(img)
+
+    draw.rectangle((int(img.width / 2) - int((f / 2)), int(img.height / 2) - int(ll / 2),
+                    int(img.width / 2) + int((f / 2)), int(img.height / 2) + int(ll / 2)),
+                   fill=(int(lb*1.5), 0, 0), outline=None)
+
+    fixation(draw)
+
+    basename = os.path.basename('krds0.png')
+    img.save(os.path.join(to_dir, basename), quality=100)
+
+
+ls()
+
+
+to_dir = 'materials'
+os.makedirs(to_dir, exist_ok=True)
 # sound files
 # special thank: @kinaonao  https://qiita.com/kinaonao/items/c3f2ef224878fbd232f5
 

@@ -31,7 +31,7 @@ d_height = 2.54 * (aspect_height / c) * inch
 deg1 = round(resolution * (1 / d_height))
 
 # independent variables
-variation = [4, 4]
+variation = [4]
 
 # repetition
 rept = 1

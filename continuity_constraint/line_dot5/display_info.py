@@ -32,15 +32,16 @@ deg1 = round(resolution * (1 / d_height))
 
 # independent variables
 # The __init__.py refers this var.
-variation = ['S', 'R']
-
-var3 = variation
+variation = [0, 1, 2]
 
 # repetition
 rept = 1
 
+cal = 0 #-58 # You can calibrate the convergence angle for better viewing.
+
 # Replicate for repetition
-variation2 = list(np.repeat(var3, rept))
+# The COM.py refers this var.
+variation2 = list(np.repeat(variation, rept))
 
 # Randomize
 r = random.randint(0, math.factorial(len(variation2)))
