@@ -34,7 +34,7 @@ deg1 = round(resolution * (1 / d_height))
 variation = [0.5, 1.0, 2.0, 4.0]
 
 # repetition
-rept = [1]#, 2, 3, 4, 5]
+rept = [1, 2, 3]#, 4, 5]
 
 # Replicate for repetition
 variation2 = list(np.repeat(variation, len(rept)))
