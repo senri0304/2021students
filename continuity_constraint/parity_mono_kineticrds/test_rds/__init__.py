@@ -63,7 +63,7 @@ img.save(os.path.join(to_dir, basename), quality=100)
 
 
 # rds, requires line size in proportion, background image path and target image path
-def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
+def stereogramize(disparity, outer='materials/rdsnoise.png'):
     # Two images prepare
     bg = Image.open(outer)
     gbg = Image.open('materials/gbg.png')
@@ -73,17 +73,8 @@ def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
     img.paste(img_resize, (int(gbg.width/2 - img_resize.width/2) + disparity, int(gbg.height/2 - img_resize.height/2)))
     gbg = Image.alpha_composite(gbg, img)
     draw = ImageDraw.Draw(gbg)
-    if size == 0:
-        draw.rectangle((int(gbg.width / 2) - int(f / 2), int(gbg.height / 2) - int(ll / 2),
-                        int(gbg.width / 2) + int(f / 2), int(gbg.height / 2) + int(ll / 2)),
-                       fill=(int(lb*1.5), 0, 0), outline=None)
-    else:
-        draw.rectangle((int(gbg.width / 2) - int((ll / 2)*size), int(gbg.height / 2) - int(f / 2),
-                        int(gbg.width / 2) + int((ll / 2)*size), int(gbg.height / 2) + int(f / 2)),
-                       fill=(0, 0, 0), outline=None)
     fixation(draw)
-    basename = os.path.basename('rds' + str(disparity) + str(size) + str(n) + '.png')
-    gbg.save(os.path.join(to_dir, basename), quality=100)
+    return gbg
 
 
 # stereogram without stimuli
@@ -94,6 +85,23 @@ fixation(draw)
 
 basename = os.path.basename('pedestal.png')
 img.save(os.path.join(to_dir, basename), quality=100)
+
+
+to_dir = 'stereograms'
+os.makedirs(to_dir, exist_ok=True)
+
+
+def to_gif(disparity, n):
+    imgs = []
+    for i in range(1, 11):
+        pattern('noise', 0.3, int(sz/2))
+        imgs.append(stereogramize(disparity))
+    imgs[0].save('stereograms/krds' + str(n) + '.gif',
+                 save_all=True, append_images=imgs[1:], optimize=False, duration=50, loop=1)
+
+
+for i in range(1, 6):
+    to_gif(0, i)
 
 
 # no rds rival lines
@@ -107,19 +115,10 @@ def ls(size=0):
 
     fixation(draw)
 
-    basename = os.path.basename('rds0.png')
+    basename = os.path.basename('krds0.png')
     img.save(os.path.join(to_dir, basename), quality=100)
 
 
-to_dir = 'stereograms'
-os.makedirs(to_dir, exist_ok=True)
-
-for i in range(1, 6):
-    pattern('noise', 0.3, int(sz/2))
-    stereogramize(0, 0.5, i)
-    stereogramize(0, 1.0, i)
-    stereogramize(0, 2.0, i)
-    stereogramize(0, 4.0, i)
 ls()
 
 

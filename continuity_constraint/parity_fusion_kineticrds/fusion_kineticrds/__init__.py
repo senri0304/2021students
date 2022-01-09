@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os, wave, struct
+import os, wave, struct, copy
+import numpy as np
 from PIL import Image, ImageDraw
 from display_info import *
 
@@ -46,6 +47,7 @@ def pattern(n, p, size):
     img = Image.new("RGBA", (int(shape[0]), int(shape[1])), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
 
+    y = 0
     for x in range(0, shape[0]):
         for y in range(0, shape[0]):
             if rands[x, y] != 0:
@@ -78,12 +80,9 @@ def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
                         int(gbg.width / 2) + int(f / 2), int(gbg.height / 2) + int(ll / 2)),
                        fill=(int(lb*1.5), 0, 0), outline=None)
     else:
-        draw.rectangle((int(gbg.width / 2) - int((ll / 2)*size), int(gbg.height / 2) - int(f / 2),
-                        int(gbg.width / 2) + int((ll / 2)*size), int(gbg.height / 2) + int(f / 2)),
-                       fill=(0, 0, 0), outline=None)
+        pass
     fixation(draw)
-    basename = os.path.basename('rds' + str(disparity) + str(size) + str(n) + '.png')
-    gbg.save(os.path.join(to_dir, basename), quality=100)
+    return gbg
 
 
 # stereogram without stimuli
@@ -96,31 +95,32 @@ basename = os.path.basename('pedestal.png')
 img.save(os.path.join(to_dir, basename), quality=100)
 
 
-# no rds rival lines
-def ls(size=0):
-    img = Image.new("RGB", (sz*2, sz*2), (lb, lb, lb))
-    draw = ImageDraw.Draw(img)
-
-    draw.rectangle((int(img.width / 2) - int((f / 2)), int(img.height / 2) - int(ll / 2),
-                    int(img.width / 2) + int((f / 2)), int(img.height / 2) + int(ll / 2)),
-                   fill=(int(lb*1.5), 0, 0), outline=None)
-
-    fixation(draw)
-
-    basename = os.path.basename('rds0.png')
-    img.save(os.path.join(to_dir, basename), quality=100)
-
-
 to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
+
+m = 1
+def to_gif(disparity, line_length, n):
+    global m
+    imgs = []
+    imgs2 = []
+    for i in range(1, 11):
+        pattern('noise', 0.3, int(sz/2))
+        imgs.append(stereogramize(disparity, line_length, i))
+        imgs2.append(stereogramize(disparity, 0, i))
+    imgs[0].save('stereograms/krds' + str(line_length) + str(n) + '.gif',
+                 save_all=True, append_images=imgs[1:], optimize=False, duration=50, loop=1)
+    imgs2[0].save('stereograms/krds0' + str(line_length) + str(n) + '.gif',
+                 save_all=True, append_images=imgs2[1:], optimize=False, duration=50, loop=1)
+
+
+
 for i in range(1, 6):
-    pattern('noise', 0.3, int(sz/2))
-    stereogramize(0, 0.5, i)
-    stereogramize(0, 1.0, i)
-    stereogramize(0, 2.0, i)
-    stereogramize(0, 4.0, i)
-ls()
+    to_gif(0, 0.5, i)
+    to_gif(0, 1.0, i)
+    to_gif(0, 2.0, i)
+    to_gif(0, 4.0, i)
+    m += 1
 
 
 to_dir = 'materials'

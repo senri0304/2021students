@@ -32,21 +32,25 @@ deg1 = round(resolution * (1 / d_height))
 
 # independent variables
 variation = [0.5, 1.0, 2.0, 4.0]
+variation2 = [0.05]#, 0.3]
 
 # repetition
 rept = [1]#, 2, 3, 4, 5]
 
 # Replicate for repetition
-variation2 = list(np.repeat(variation, len(rept)))
-var2 = rept*len(variation)
+var1 = list(np.repeat(variation, len(variation2)))#*len(rept)))
+var2 = variation2*len(variation)#list(np.repeat(variation2, len(var1)))
+
+print(var1)
+print(var2)
 
 
 # Randomize
-r = random.randint(0, math.factorial(len(variation2)))
+r = random.randint(0, math.factorial(len(var1)))
 random.seed(r)
-sequence = random.sample(variation2, len(variation2))
+sequence = random.sample(var1, len(var1))
 random.seed(r)
-sequence2 = random.sample(var2, len(variation2))
+sequence2 = random.sample(var2, len(var1))
 
 print(sequence)
 print(sequence2)

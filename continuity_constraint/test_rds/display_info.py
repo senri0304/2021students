@@ -31,14 +31,15 @@ d_height = 2.54 * (aspect_height / c) * inch
 deg1 = round(resolution * (1 / d_height))
 
 # independent variables
-variation = [0.5, 1.0, 2.0, 4.0]
+variation = ['0', '0.15', '0.3', '0.6']
 
 # repetition
-rept = [1]#, 2, 3, 4, 5]
+rept = 3
+repetition = list(range(1, rept + 1))
 
 # Replicate for repetition
-variation2 = list(np.repeat(variation, len(rept)))
-var2 = rept*len(variation)
+variation2 = list(np.repeat(variation, rept))
+repetition = repetition*len(variation)
 
 
 # Randomize
@@ -46,7 +47,7 @@ r = random.randint(0, math.factorial(len(variation2)))
 random.seed(r)
 sequence = random.sample(variation2, len(variation2))
 random.seed(r)
-sequence2 = random.sample(var2, len(variation2))
+sequence2 = random.sample(repetition, len(variation2))
 
 print(sequence)
 print(sequence2)

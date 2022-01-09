@@ -86,7 +86,7 @@ def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
     else:
         draw.rectangle((int(gbg.width / 2) - int((ll / 2)*size), int(gbg.height / 2) - int(f / 2),
                         int(gbg.width / 2) + int((ll / 2)*size), int(gbg.height / 2) + int(f / 2)),
-                       fill=(int(lb*1.5), 0, 0), outline=None)
+                       fill=(0, 0, 0), outline=None)
 
     fixation(draw)
 

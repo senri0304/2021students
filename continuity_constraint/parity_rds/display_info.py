@@ -35,7 +35,7 @@ variation = [0.5, 1.0, 2.0, 4.0]
 var = [1, 2, 3, 4]
 
 # repetition
-rept = 1
+rept = 3
 
 # Replicate for repetition
 variation2 = list(np.repeat(variation, rept))

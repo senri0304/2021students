@@ -11,7 +11,7 @@ from display_info import *
 
 # Prefernce
 # ------------------------------------------------------------------------
-rept = 1
+test_eye = 'r'
 cal = -58 # You can calibrate the convergence angle for better viewing.
 # ------------------------------------------------------------------------
 
@@ -147,16 +147,26 @@ def get_results(dt):
 
 def set_polygon(seq, seq2):
     global L, R, n
-#    ani = pyglet.image.Animation.from_image_sequence(imgs, duration=0.1, loop=True)
-    # Set up polygon for stimulus
-    R = pyglet.resource.animation('stereograms/rds0' + str(seq) + str(seq2) + '.png')
-    R = pyglet.sprite.Sprite(R)
-    R.x = cntx + deg1 * iso + cal - R.width / 2.0
-    R.y = cnty - R.height / 2.0
-    L = pyglet.resource.animation('stereograms/rds0.png') # the test bar
-    L = pyglet.sprite.Sprite(L)
-    L.x = cntx - deg1 * iso - cal - L.width / 2.0
-    L.y = cnty - L.height / 2.0
+    if test_eye == 'l':
+        # Set up polygon for stimulus
+        R = pyglet.resource.animation('stereograms/rds0' + str(seq) + str(seq2) + '.png')
+        R = pyglet.sprite.Sprite(R)
+        R.x = cntx + deg1 * iso + cal - R.width / 2.0
+        R.y = cnty - R.height / 2.0
+        L = pyglet.resource.animation('stereograms/rds0.png') # the test bar
+        L = pyglet.sprite.Sprite(L)
+        L.x = cntx - deg1 * iso - cal - L.width / 2.0
+        L.y = cnty - L.height / 2.0
+    else:
+        # Set up polygon for stimulus
+        R = pyglet.resource.animation('stereograms/rds0.png')
+        R = pyglet.sprite.Sprite(R)
+        R.x = cntx + deg1 * iso + cal - R.width / 2.0
+        R.y = cnty - R.height / 2.0
+        L = pyglet.resource.animation('stereograms/rds0' + str(seq) + str(seq2) + '.png') # the test bar
+        L = pyglet.sprite.Sprite(L)
+        L.x = cntx - deg1 * iso - cal - L.width / 2.0
+        L.y = cnty - L.height / 2.0
 
 
 def prepare_routine():

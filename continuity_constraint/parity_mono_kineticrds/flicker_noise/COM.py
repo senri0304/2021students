@@ -11,7 +11,7 @@ from display_info import *
 
 # Prefernce
 # ------------------------------------------------------------------------
-test_eye = 'r'
+rept = 1
 cal = -58 # You can calibrate the convergence angle for better viewing.
 # ------------------------------------------------------------------------
 
@@ -39,7 +39,6 @@ pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
 fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 + cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 
-
 # ----------- Core program following ----------------------------
 
 # A getting key response function
@@ -53,6 +52,7 @@ class key_resp(object):
             p_sound.play()
             exit = False
             pyglet.clock.schedule_once(delete, 30.0)
+            pyglet.clock.schedule_interval(on_flip, 0.5)
             replace()
             trial_start = time.time()
         if symbol == key.ESCAPE:
@@ -78,8 +78,8 @@ def fixer():
 def replace():
     del draw_objects[:]
     fixer()
-    draw_objects.append(R)
     draw_objects.append(L)
+    draw_objects.append(R)
 
 
 # A end routine function
@@ -101,6 +101,15 @@ def on_draw():
         draw_object.draw()
 
 
+def on_flip(dt):
+    # Refresh window
+    win.clear()
+    if draw_objects[len(draw_objects)-1] ==R:
+        draw_objects.append(rds)
+    else:
+        draw_objects.append(R)
+
+
 # Remove stimulus
 def delete(dt):
     global n, trial_end
@@ -108,6 +117,7 @@ def delete(dt):
     p_sound.play()
     n += 1
     pyglet.clock.schedule_once(get_results, 1.0)
+    pyglet.clock.unschedule(on_flip)
     trial_end = time.time()
 
 
@@ -136,7 +146,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]))# + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
@@ -146,27 +156,21 @@ def get_results(dt):
 
 
 def set_polygon(seq, seq2):
-    global L, R, n
-    if test_eye =='l':
-        # Set up polygon for stimulus
-        R = pyglet.resource.image('stereograms/rds0' + str(seq) + str(int(seq2)) + '.png')
-        R = pyglet.sprite.Sprite(R)
-        R.x = cntx + deg1 * iso + cal - R.width / 2.0
-        R.y = cnty - R.height / 2.0
-        L = pyglet.resource.image('stereograms/rds00' + str(int(seq2)) + '.png') # the test bar
-        L = pyglet.sprite.Sprite(L)
-        L.x = cntx - deg1 * iso - cal - L.width / 2.0
-        L.y = cnty - L.height / 2.0
-    else:
-        # Set up polygon for stimulus
-        R = pyglet.resource.image('stereograms/rds00' + str(int(seq2)) + '.png')
-        R = pyglet.sprite.Sprite(R)
-        R.x = cntx + deg1 * iso + cal - R.width / 2.0
-        R.y = cnty - R.height / 2.0
-        L = pyglet.resource.image('stereograms/rds0' + str(seq) + str(int(seq2)) + '.png')  # the test bar
-        L = pyglet.sprite.Sprite(L)
-        L.x = cntx - deg1 * iso - cal - L.width / 2.0
-        L.y = cnty - L.height / 2.0
+    global L, R, n, rds
+    # Set up polygon for stimulus
+    R = pyglet.resource.animation('stereograms/krds' + str(seq) + str(seq2) + '.gif')
+    R = pyglet.sprite.Sprite(R)
+    R.x = cntx + deg1 * iso + cal - R.width / 2.0
+    R.y = cnty - R.height / 2.0
+    L = pyglet.resource.animation('stereograms/krds0.png') # the test bar
+    L = pyglet.sprite.Sprite(L)
+    L.x = cntx - deg1 * iso - cal - L.width / 2.0
+    L.y = cnty - L.height / 2.0
+    rds = pyglet.resource.animation('stereograms/krds0' + str(seq2) + '.gif')
+    rds = pyglet.sprite.Sprite(rds)
+    rds.x = cntx + deg1 * iso + cal - R.width / 2.0
+    rds.y = cnty - R.height / 2.0
+
 
 def prepare_routine():
     if n < len(variation2):
@@ -201,8 +205,7 @@ daten = datetime.datetime.now()
 
 # Write results onto csv
 results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
-#                        'continuity': sequence2,
-#                        'test_eye': sequence3,
+                        'cnd2': sequence2,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

@@ -31,10 +31,10 @@ d_height = 2.54 * (aspect_height / c) * inch
 deg1 = round(resolution * (1 / d_height))
 
 # independent variables
-variation = [0.5, 1.0, 2.0, 4.0]
+variation = [0.0, 6.0, 12.0]
 
 # repetition
-rept = [1]#, 2, 3, 4, 5]
+rept = [1, 2, 3]#, 4, 5]
 
 # Replicate for repetition
 variation2 = list(np.repeat(variation, len(rept)))

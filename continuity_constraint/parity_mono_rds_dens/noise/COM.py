@@ -11,7 +11,6 @@ from display_info import *
 
 # Prefernce
 # ------------------------------------------------------------------------
-test_eye = 'r'
 cal = -58 # You can calibrate the convergence angle for better viewing.
 # ------------------------------------------------------------------------
 
@@ -136,7 +135,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]))# + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
@@ -145,28 +144,19 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq, seq2):
+def set_polygon(seq, seq2, seq3=1):
     global L, R, n
-    if test_eye =='l':
-        # Set up polygon for stimulus
-        R = pyglet.resource.image('stereograms/rds0' + str(seq) + str(int(seq2)) + '.png')
-        R = pyglet.sprite.Sprite(R)
-        R.x = cntx + deg1 * iso + cal - R.width / 2.0
-        R.y = cnty - R.height / 2.0
-        L = pyglet.resource.image('stereograms/rds00' + str(int(seq2)) + '.png') # the test bar
-        L = pyglet.sprite.Sprite(L)
-        L.x = cntx - deg1 * iso - cal - L.width / 2.0
-        L.y = cnty - L.height / 2.0
-    else:
-        # Set up polygon for stimulus
-        R = pyglet.resource.image('stereograms/rds00' + str(int(seq2)) + '.png')
-        R = pyglet.sprite.Sprite(R)
-        R.x = cntx + deg1 * iso + cal - R.width / 2.0
-        R.y = cnty - R.height / 2.0
-        L = pyglet.resource.image('stereograms/rds0' + str(seq) + str(int(seq2)) + '.png')  # the test bar
-        L = pyglet.sprite.Sprite(L)
-        L.x = cntx - deg1 * iso - cal - L.width / 2.0
-        L.y = cnty - L.height / 2.0
+#    ani = pyglet.image.Animation.from_image_sequence(imgs, duration=0.1, loop=True)
+    # Set up polygon for stimulus
+    R = pyglet.resource.animation('stereograms/rds' + str(seq2) + str(seq) + str(seq3) + '.png')
+    R = pyglet.sprite.Sprite(R)
+    R.x = cntx + deg1 * iso + cal - R.width / 2.0
+    R.y = cnty - R.height / 2.0
+    L = pyglet.resource.animation('stereograms/rds0.png') # the test bar
+    L = pyglet.sprite.Sprite(L)
+    L.x = cntx - deg1 * iso - cal - L.width / 2.0
+    L.y = cnty - L.height / 2.0
+
 
 def prepare_routine():
     if n < len(variation2):
@@ -201,8 +191,7 @@ daten = datetime.datetime.now()
 
 # Write results onto csv
 results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
-#                        'continuity': sequence2,
-#                        'test_eye': sequence3,
+                        'cnd2': sequence2,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

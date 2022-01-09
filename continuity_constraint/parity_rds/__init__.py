@@ -86,7 +86,7 @@ def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
     else:
         draw.rectangle((int(gbg.width / 2) - int((ll / 2)*size), int(gbg.height / 2) - int(f / 2),
                         int(gbg.width / 2) + int((ll / 2)*size), int(gbg.height / 2) + int(f / 2)),
-                       fill=(int(lb*1.5), 0, 0), outline=None)
+                       fill=(0, 0, 0), outline=None)
 
     fixation(draw)
 
@@ -95,13 +95,10 @@ def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
     gbg.save(os.path.join(to_dir, basename), quality=100)
 
 
-loop = 0
 for loop in range(1, 5):
-    pattern('noise', 0.05, int(sz/2))
+    pattern('noise', 0.3, int(sz/2))
     stereogramize(0, 0, loop)
-#        stereogramize(-4, 0, loop)
     stereogramize(0, 0.5, loop)
-#        stereogramize(-4, i, loop)
     stereogramize(0, 1.0, loop)
     stereogramize(0, 2.0, loop)
     stereogramize(0, 4.0, loop)

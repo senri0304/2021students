@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 from display_info import *
 
 
-to_dir = 'materials'
+to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
 # Input stereogram relative_size in cm unit
@@ -38,52 +38,36 @@ def fixation(d):
                  int(sz) + eccentricity + f * 3, int(sz) + eccentricity - f),
                 fill=(0, 0, 255), outline=None)
 
-# generate random pattern
-def pattern(n, p, size):
-    shape = (size, size)
-    rands = np.random.binomial(2, p, shape)
 
-    img = Image.new("RGBA", (int(shape[0]), int(shape[1])), (255, 255, 255, 0))
+def ls(size):
+    img = Image.new("RGB", (sz*2, sz*2), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
 
-    for x in range(0, shape[0]):
-        for y in range(0, shape[0]):
-            if rands[x, y] != 0:
-                draw.point((rands[x, y]*x, y), fill=lm)
-
-    img.save(os.path.join('materials/rds' + str(n) + '.png'), quality=100)
-
-
-# stereogram without stimuli
-img = Image.new("RGBA", (sz*2, sz*2), (lb, lb, lb, 255))
-draw = ImageDraw.Draw(img)
-
-basename = os.path.basename('gbg.png')
-img.save(os.path.join(to_dir, basename), quality=100)
-
-
-# rds, requires line size in proportion, background image path and target image path
-def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
-    # Two images prepare
-    bg = Image.open(outer)
-    gbg = Image.open('materials/gbg.png')
-
-    img_resize = bg.resize((int(bg.width*2), int(bg.height*2)))
-    img = Image.new('RGBA', (sz*2, sz*2), (lb, lb, lb, 0))
-    img.paste(img_resize, (int(gbg.width/2 - img_resize.width/2) + disparity, int(gbg.height/2 - img_resize.height/2)))
-    gbg = Image.alpha_composite(gbg, img)
-    draw = ImageDraw.Draw(gbg)
     if size == 0:
-        draw.rectangle((int(gbg.width / 2) - int(f / 2), int(gbg.height / 2) - int(ll / 2),
-                        int(gbg.width / 2) + int(f / 2), int(gbg.height / 2) + int(ll / 2)),
+        draw.rectangle((int(img.width / 2) - int(f / 2), int(img.height / 2) - int(ll / 2),
+                        int(img.width / 2) + int(f / 2), int(img.height / 2) + int(ll / 2)),
                        fill=(int(lb*1.5), 0, 0), outline=None)
     else:
-        draw.rectangle((int(gbg.width / 2) - int((ll / 2)*size), int(gbg.height / 2) - int(f / 2),
-                        int(gbg.width / 2) + int((ll / 2)*size), int(gbg.height / 2) + int(f / 2)),
+        draw.rectangle((int(img.width / 4), int(img.height / 4),
+                        int(img.width*0.75), int(img.height*0.75)),
+                       fill=(int(lb/2), int(lb/2), int(lb/2)), outline=None)
+        draw.rectangle((int(img.width / 2) - int((ll / 2) * size), int(img.height / 2) - int(f / 2),
+                        int(img.width / 2) + int((ll / 2) * size), int(img.height / 2) + int(f / 2)),
                        fill=(0, 0, 0), outline=None)
+
     fixation(draw)
-    basename = os.path.basename('rds' + str(disparity) + str(size) + str(n) + '.png')
-    gbg.save(os.path.join(to_dir, basename), quality=100)
+
+    basename = os.path.basename('rds' + str(size) + '.png')
+    img.save(os.path.join(to_dir, basename), quality=100)
+
+
+for i in variation:
+    ls(i)
+ls(0)
+
+
+to_dir = 'materials'
+os.makedirs(to_dir, exist_ok=True)
 
 
 # stereogram without stimuli
@@ -96,35 +80,6 @@ basename = os.path.basename('pedestal.png')
 img.save(os.path.join(to_dir, basename), quality=100)
 
 
-# no rds rival lines
-def ls(size=0):
-    img = Image.new("RGB", (sz*2, sz*2), (lb, lb, lb))
-    draw = ImageDraw.Draw(img)
-
-    draw.rectangle((int(img.width / 2) - int((f / 2)), int(img.height / 2) - int(ll / 2),
-                    int(img.width / 2) + int((f / 2)), int(img.height / 2) + int(ll / 2)),
-                   fill=(int(lb*1.5), 0, 0), outline=None)
-
-    fixation(draw)
-
-    basename = os.path.basename('rds0.png')
-    img.save(os.path.join(to_dir, basename), quality=100)
-
-
-to_dir = 'stereograms'
-os.makedirs(to_dir, exist_ok=True)
-
-for i in range(1, 6):
-    pattern('noise', 0.3, int(sz/2))
-    stereogramize(0, 0.5, i)
-    stereogramize(0, 1.0, i)
-    stereogramize(0, 2.0, i)
-    stereogramize(0, 4.0, i)
-ls()
-
-
-to_dir = 'materials'
-os.makedirs(to_dir, exist_ok=True)
 # sound files
 # special thank: @kinaonao  https://qiita.com/kinaonao/items/c3f2ef224878fbd232f5
 
