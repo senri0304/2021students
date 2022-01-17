@@ -41,7 +41,7 @@ def fixation(d):
 # generate random pattern
 def pattern(n, p, size):
     shape = (size, size)
-    rands = np.random.binomial(2, p, shape)
+    rands = np.random.binomial(1, p, shape)
 
     img = Image.new("RGBA", (int(shape[0]), int(shape[1])), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
