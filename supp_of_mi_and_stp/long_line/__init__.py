@@ -108,25 +108,18 @@ def stereogramize(n, m, t=1):
     img.save(os.path.join(to_dir, basename), quality=100)
 
 
-stereogramize(2, 0)
-stereogramize(5, 0)
-stereogramize(5, 1)
-stereogramize(2, 0, -1)
-stereogramize(5, 0, -1)
-stereogramize(5, 1, -1)
-stereogramize(8, 0)
-stereogramize(8, 0, -1)
 stereogramize(8, 2)
 stereogramize(8, 2, -1)
 
 
 # ls
 def ls(t):
+    distance = 2
     img = Image.new("RGB", (sz, sz), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
 
-    draw.rectangle((int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + int(ll / 2),
-                    int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - int(ll / 2)),
+    draw.rectangle((int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + distance*8 + int(f) + int(ll / 2),
+                    int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - distance*8 - int(f) - int(ll / 2)),
                    fill=(0, 0, 0), outline=None)
 
     fixation(draw)

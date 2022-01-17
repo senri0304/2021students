@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os, wave, struct, copy
-import numpy as np
+import os, wave, struct
 from PIL import Image, ImageDraw
 from display_info import *
 
 
-to_dir = 'materials'
+to_dir = 'stereograms'
 os.makedirs(to_dir, exist_ok=True)
 
 # Input stereogram relative_size in cm unit
@@ -17,7 +16,7 @@ size = 2.0
 line_length = 0.7  # 30pix is 42 min of arc on 57cm distance
 
 # Input luminance of background
-lb = 85  # 215, 84%
+lb = 60  # 215, 84%
 lm = (30, 30, 30)
 
 # Input fixation point position in cm unit
@@ -39,72 +38,34 @@ def fixation(d):
                  int(sz) + eccentricity + f * 3, int(sz) + eccentricity - f),
                 fill=(0, 0, 255), outline=None)
 
-# generate random pattern
-def pattern(n, p, size):
-    shape = (size, size)
-    rands = np.random.binomial(1, p, shape)
-    rands2 = rands + 1
 
-    img = Image.new("RGBA", (int(shape[0]), int(shape[1])), (255, 255, 255, 0))
+def ls(size):
+    img = Image.new("RGB", (sz*2, sz*2), (lb, lb, lb))
     draw = ImageDraw.Draw(img)
-    img2 = Image.new("RGBA", (int(shape[0]), int(shape[1])), (255, 255, 255, 0))
-    draw2 = ImageDraw.Draw(img2)
 
-    for x in range(0, shape[0]):
-        for y in range(0, shape[1]):
-            if rands[x, y] != 0:
-                draw.point((rands[x, y]*x, y), fill=lm)
-            if rands2[x, y] == 1:
-                draw2.point((rands2[x, y]*x, y), fill=lm)
-
-    img.save(os.path.join('materials/rds' + str(n) + '.png'), quality=100)
-    img2.save(os.path.join('materials/rds2' + str(n) + '.png'), quality=100)
-
-
-# stereogram without stimuli
-img = Image.new("RGBA", (sz*2, sz*2), (lb, lb, lb, 255))
-draw = ImageDraw.Draw(img)
-
-basename = os.path.basename('gbg.png')
-img.save(os.path.join(to_dir, basename), quality=100)
-
-
-to_dir = 'stereograms'
-os.makedirs(to_dir, exist_ok=True)
-
-
-# rds, requires line size in proportion, background image path and target image path
-def stereogramize(disparity, size, n, outer='materials/rdsnoise.png'):
-    # Two images prepare
-    bg = Image.open(outer)
-    gbg = Image.open('materials/gbg.png')
-
-    img_resize = bg.resize((int(bg.width*2), int(bg.height*2)))
-    img = Image.new('RGBA', (sz*2, sz*2), (lb, lb, lb, 0))
-    img.paste(img_resize, (int(gbg.width/2 - img_resize.width/2) + disparity, int(gbg.height/2 - img_resize.height/2)))
-    gbg = Image.alpha_composite(gbg, img)
-    draw = ImageDraw.Draw(gbg)
     if size == 0:
-        draw.rectangle((int(gbg.width / 2) - int(f / 2), int(gbg.height / 2) - int(ll / 2),
-                        int(gbg.width / 2) + int(f / 2), int(gbg.height / 2) + int(ll / 2)),
+        draw.rectangle((int(img.width / 2) - int(f / 2), int(img.height / 2) - int(ll / 2),
+                        int(img.width / 2) + int(f / 2), int(img.height / 2) + int(ll / 2)),
                        fill=(int(lb*1.5), 0, 0), outline=None)
     else:
-        draw.rectangle((int(gbg.width / 2) - int((ll / 2)*size), int(gbg.height / 2) - int(f / 2),
-                        int(gbg.width / 2) + int((ll / 2)*size), int(gbg.height / 2) + int(f / 2)),
+        draw.rectangle((int(img.width / 2) - int((ll / 2) * size), int(img.height / 2) - int(f / 2),
+                        int(img.width / 2) + int((ll / 2) * size), int(img.height / 2) + int(f / 2)),
                        fill=(0, 0, 0), outline=None)
 
     fixation(draw)
 
-    # Write images
-    basename = os.path.basename('rds' + str(disparity) + str(size) + str(n) + '.png')
-    gbg.save(os.path.join(to_dir, basename), quality=100)
+    basename = os.path.basename('rds' + str(size) + '.png')
+    img.save(os.path.join(to_dir, basename), quality=100)
 
 
 for i in variation:
-    for loop in range(1, 4):
-        pattern('noise', 0.5, int(sz/2))
-        stereogramize(0, 0, str(loop) + str(i), outer='materials/rdsnoise.png')
-        stereogramize(0, i, loop, outer='materials/rds2noise.png')
+    ls(i)
+ls(0)
+
+
+to_dir = 'materials'
+os.makedirs(to_dir, exist_ok=True)
+
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz*2, sz*2), (lb, lb, lb))
@@ -112,10 +73,9 @@ draw = ImageDraw.Draw(img)
 
 fixation(draw)
 
-to_dir = 'materials'
-os.makedirs(to_dir, exist_ok=True)
 basename = os.path.basename('pedestal.png')
 img.save(os.path.join(to_dir, basename), quality=100)
+
 
 # sound files
 # special thank: @kinaonao  https://qiita.com/kinaonao/items/c3f2ef224878fbd232f5

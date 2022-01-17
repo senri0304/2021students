@@ -1,24 +1,38 @@
 # -*- coding: utf-8 -*-
 import datetime
+import math
 import os
 import pyglet
+import random
 import time
 from collections import deque
+
+import numpy as np
 import pandas as pd
+from pyglet.gl import *
 from pyglet.image import AbstractImage
 
-from display_info import *
+import display_info
 
 # Prefernce
 # ------------------------------------------------------------------------
-test_eye = 'r'
-cal = -58 # You can calibrate the convergence angle for better viewing.
+rept = 3
+cal = -58
+exclude_mousePointer = False
 # ------------------------------------------------------------------------
 
+# Get display informations
+display = pyglet.canvas.get_display()
+screens = display.get_screens()
+win = pyglet.window.Window(style=pyglet.window.Window.WINDOW_STYLE_BORDERLESS)
+win.set_fullscreen(fullscreen=True, screen=screens[len(screens) - 1])  # Present secondary display
+win.set_exclusive_mouse(exclude_mousePointer)  # Exclude mouse pointer
 key = pyglet.window.key
-win = win
 
 # Load variable conditions
+deg1 = display_info.deg1
+cntx = screens[len(screens) - 1].width / 2  # Store center of screen about x position
+cnty = screens[len(screens) - 1].height / 3  # Store center of screen about y position
 dat = pd.DataFrame()
 iso = 8.0
 draw_objects = []  # 描画対象リスト
@@ -38,6 +52,35 @@ beep_sound = pyglet.resource.media('materials/460Hz.wav', streaming=False)
 pedestal: AbstractImage = pyglet.image.load('materials/pedestal.png')
 fixr = pyglet.sprite.Sprite(pedestal, x=cntx + iso * deg1 + cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
 fixl = pyglet.sprite.Sprite(pedestal, x=cntx - iso * deg1 - cal - pedestal.width / 2.0, y=cnty - pedestal.height / 2.0)
+
+# variation
+variation = [8]
+continuity = [2]
+test_eye = [-1, 1]
+
+# measure only crossed disparity
+# Replicate for repetition
+variation2 = list(np.repeat(variation, rept*len(test_eye)))
+continuity2 = list(np.repeat(continuity, rept*len(test_eye)))
+test_eye2 = test_eye*int((len(variation2)/2)) #list(np.repeat(test_eye, len(variation2) / 2))
+
+print(variation2)
+print(continuity2)
+print(test_eye2)
+
+# Randomize
+r = random.randint(0, math.factorial(len(variation2)))
+random.seed(r)
+sequence = random.sample(variation2, len(variation2))
+random.seed(r)
+sequence2 = random.sample(continuity2, len(variation2))
+random.seed(r)
+sequence3 = random.sample(test_eye2, len(variation2))
+
+print(sequence)
+print(sequence2)
+print(sequence3)
+print(len(sequence))
 
 
 # ----------- Core program following ----------------------------
@@ -136,7 +179,7 @@ def get_results(dt):
     print("cdt: " + str(c))
     print("mdt: " + str(m))
     print("dtstd: " + str(d))
-    print("condition: " + str(sequence[n - 1]))# + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
+    print("condition: " + str(sequence[n - 1]) + ', ' + str(sequence2[n - 1]) + ', ' + str(sequence3[n - 1]))
     print("--------------------------------------------------")
     # Check the experiment continue or break
     if n != len(variation2):
@@ -145,32 +188,23 @@ def get_results(dt):
         pyglet.app.exit()
 
 
-def set_polygon(seq, seq2):
+def set_polygon(seq, seq2, seq3):
     global L, R, n
-    if test_eye == ' l':
-        # Set up polygon for stimulus
-        R = pyglet.resource.image('stereograms/rds0' + str(seq) + str(int(seq2)) + '.png')
-        R = pyglet.sprite.Sprite(R)
-        R.x = cntx + deg1 * iso + cal - R.width / 2.0
-        R.y = cnty - R.height / 2.0
-        L = pyglet.resource.image('stereograms/rds00' + str(int(seq2)) + str(seq) + '.png') # the test bar
-        L = pyglet.sprite.Sprite(L)
-        L.x = cntx - deg1 * iso - cal - L.width / 2.0
-        L.y = cnty - L.height / 2.0
-    else:
-        R = pyglet.resource.image('stereograms/rds00' + str(int(seq2)) + str(seq) + '.png')
-        R = pyglet.sprite.Sprite(R)
-        R.x = cntx + deg1 * iso + cal - R.width / 2.0
-        R.y = cnty - R.height / 2.0
-        L = pyglet.resource.image('stereograms/rds0' + str(seq) + str(int(seq2)) + '.png') # the test bar
-        L = pyglet.sprite.Sprite(L)
-        L.x = cntx - deg1 * iso - cal - L.width / 2.0
-        L.y = cnty - L.height / 2.0
+    # Set up polygon for stimulus
+    R = pyglet.resource.image('stereograms/0ls0' + str(seq3*-1) + '.png')
+    R = pyglet.sprite.Sprite(R)
+    R.x = cntx + deg1 * iso*seq3 + cal*seq3 - R.width / 2.0
+    R.y = cnty - R.height / 2.0
+    L = pyglet.resource.image('stereograms/' + str(seq) + 'ls' + str(seq2) + str(seq3) + '.png') # the test bar
+    L = pyglet.sprite.Sprite(L)
+    L.x = cntx - deg1 * iso*seq3 - cal*seq3 - L.width / 2.0
+    L.y = cnty - L.height / 2.0
+
 
 def prepare_routine():
     if n < len(variation2):
         fixer()
-        set_polygon(sequence[n], sequence2[n])#, sequence3[n])
+        set_polygon(sequence[n], sequence2[n], sequence3[n])
     else:
         pass
 
@@ -180,7 +214,7 @@ start = time.time()
 win.push_handlers(resp_handler)
 
 fixer()
-set_polygon(sequence[0], sequence2[0])#, sequence3[0])
+set_polygon(sequence[0], sequence2[0], sequence3[0])
 
 for i in sequence:
     tc = 0  # Count transients
@@ -200,8 +234,8 @@ daten = datetime.datetime.now()
 
 # Write results onto csv
 results = pd.DataFrame({'cnd': sequence,  # Store variance_A conditions
-#                        'continuity': sequence2,
-#                        'test_eye': sequence3,
+                        'continuity': sequence2,
+                        'test_eye': sequence3,
                         'transient_counts': tcs,  # Store transient_counts
                         'cdt': cdt,  # Store cdt(target values) and input number of trials
                         'mdt': mdt,

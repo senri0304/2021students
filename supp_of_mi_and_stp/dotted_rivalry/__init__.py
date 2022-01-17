@@ -35,7 +35,7 @@ ll = round(resolution * line_length / d_height)
 f = round(sz * 0.023 / 2)  # 3.6 min of arc in 5 deg presentation area, actually 0.6 mm
 
 # Input the disparity at pixel units.
-disparity = f*1.5 # 3.0pix, approximately 3*1.5 = 4.5'
+disparity = 0 #f*2
 
 eccentricity = round(1 / np.sqrt(2.0) * ecc / d_height * resolution)
 
@@ -64,11 +64,6 @@ def stereogramize(n, m, t=1):
 
     distance = 2 # 2 dots correspond half of bar's width
 
-    # stereoscopic stimulus
-    draw.rectangle((int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + int(ll / 2),
-                    int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - int(ll / 2)),
-                   fill=(0, 0, 0), outline=None)
-
     # dots
     draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) + (distance*n) + int(ll / 2),
                     int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + (distance*n) + int(f) + int(ll / 2)),
@@ -85,7 +80,6 @@ def stereogramize(n, m, t=1):
         draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) - distance*2 - int(ll / 2),
                         int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) - distance*2 - int(f) - int(ll / 2)),
                        fill=(0, 0, 0), outline=None)
-
     if m == 2:
         draw.rectangle((int(sz / 2) + int(f / 2) + disparity*t, int(sz / 2) + distance*2 + int(ll / 2),
                         int(sz / 2) - int(f / 2) + disparity*t, int(sz / 2) + distance*2 + int(f) + int(ll / 2)),
@@ -104,7 +98,7 @@ def stereogramize(n, m, t=1):
 
     fixation(draw)
 
-    basename = os.path.basename(str(n) + 'ls' + str(m) + str(t) +'.png')
+    basename = os.path.basename(str(n) + 'ls' + str(m) + str(t) + '.png')
     img.save(os.path.join(to_dir, basename), quality=100)
 
 
@@ -131,13 +125,11 @@ def ls(t):
 
     fixation(draw)
 
-    basename = os.path.basename('0ls0' + str(t) + '.png')
+    basename = os.path.basename('ls' + str(t) + '.png')
     img.save(os.path.join(to_dir, basename), quality=100)
-
 
 ls(1)
 ls(-1)
-
 
 # stereogram without stimuli
 img = Image.new("RGB", (sz, sz), (lb, lb, lb))
